@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
+  Image,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
@@ -11,6 +12,7 @@ import type { AuthStackScreenProps } from '@/navigation/types';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useAuthStore } from '@/store';
+import logo from '@/assets/logos/modami-logo-text.webp';
 
 type Props = AuthStackScreenProps<'Login'>;
 
@@ -36,8 +38,12 @@ export function LoginScreen({ navigation }: Props) {
       >
         {/* Brand */}
         <View className="mb-10">
-          <Text className="text-4xl font-bold text-primary tracking-tight">ModaMi</Text>
-          <Text className="text-base text-secondary mt-1">Thời trang bền vững, phong cách riêng bạn</Text>
+          <Image
+            source={logo}
+            style={{ width: 200, height: 60 }}
+            resizeMode="contain"
+          />
+          <Text className="text-base text-secondary mt-3">Thời trang bền vững, phong cách riêng bạn</Text>
         </View>
 
         {/* Form */}

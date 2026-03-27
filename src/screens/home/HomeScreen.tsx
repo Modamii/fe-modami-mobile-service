@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, Image, ScrollView, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Bell } from 'lucide-react-native';
 import type { MainTabScreenProps } from '@/navigation/types';
@@ -8,6 +8,8 @@ import { CreditChip } from '@/components/molecules/CreditChip';
 import { ProductCard } from '@/components/molecules/ProductCard';
 import { mockProducts } from '@/data/mock-products';
 import { COLORS } from '@/constants';
+import logoLight from '@/assets/logos/modami-logo-text.webp';
+import logoDark from '@/assets/logos/logo-text-dark.webp';
 
 type Props = MainTabScreenProps<'Home'>;
 
@@ -21,8 +23,12 @@ export function HomeScreen({ navigation }: Props) {
         {/* Header */}
         <View className="flex-row items-center justify-between px-5 py-4">
           <View>
-            <Text className="text-2xl font-bold text-on-surface tracking-tight">ModaMi</Text>
-            <Text className="text-sm text-secondary">Xin chào, {user?.name?.split(' ')[0]} 👋</Text>
+            <Image
+              source={logoLight}
+              style={{ width: 140, height: 42 }}
+              resizeMode="contain"
+            />
+            <Text className="text-sm text-secondary mt-0.5">Xin chào, {user?.name?.split(' ')[0]} 👋</Text>
           </View>
           <View className="flex-row items-center gap-3">
             <CreditChip onPress={() => navigation.navigate('Credits')} />
@@ -42,6 +48,12 @@ export function HomeScreen({ navigation }: Props) {
 
         {/* Hero banner */}
         <View className="mx-5 mb-6 bg-primary rounded-2xl p-5">
+          <Image
+            source={logoDark}
+            style={{ width: 150, height: 45 }}
+            resizeMode="contain"
+            className="mb-2"
+          />
           <Text className="text-white text-lg font-bold leading-snug">
             Thời trang bền vững{'\n'}từ cộng đồng Curator
           </Text>
