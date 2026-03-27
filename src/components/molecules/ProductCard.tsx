@@ -1,0 +1,56 @@
+import React from 'react';
+import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { Lock } from 'lucide-react-native';
+import type { Product } from '@/types';
+import { formatPrice } from '@/lib/utils';
+import { COLORS } from '@/constants';
+
+interface ProductCardProps {
+  product: Product;
+  onPress: (product: Product) => void;
+}
+
+export function ProductCard({ product, onPress }: ProductCardProps) {
+  return (
+    <TouchableOpacity
+      onPress={() => onPress(product)}
+      activeOpacity={0.9}
+      className="bg-surface rounded-2xl overflow-hidden"
+      style={{ shadowColor: '#191c1c', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.06, shadowRadius: 12, elevation: 2 }}
+    >
+      <View className="relative">
+        <Image
+          source={{ uri: product.images[0] }}
+          className="w-full aspect-square rounded-sm"
+          resizeMode="cover"
+        />
+        {product.isUnlockRequired && (
+          <View className="absolute top-2 right-2 bg-on-surface/60 rounded-full p-1.5">
+            <Lock size={12} color="#fff" />
+          </View>
+        )}
+      </View>
+
+      <View className="p-3 gap-1">
+        <Text className="text-sm font-semibold text-on-surface leading-snug" numberOfLines={2}>
+          {product.title}
+        </Text>
+        <Text className="text-xs text-secondary" numberOfLines={1}>
+          {product.brand ? `${product.brand} · ` : ''}{product.condition}
+        </Text>
+        <View className="flex-row items-center justify-between mt-1">
+          <Text className="text-sm font-bold text-primary">
+            {formatPrice(product.price)}
+          </Text>
+          {product.isUnlockRequired && (
+            <View className="flex-row items-center gap-0.5 bg-primary/10 rounded-full px-2 py-0.5">
+              <Text className="text-xs font-semibold text-primary">
+                {product.creditCost} credits
+              </Text>
+            </View>
+          )}
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+}
