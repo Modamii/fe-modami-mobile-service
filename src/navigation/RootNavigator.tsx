@@ -8,6 +8,7 @@ import { COLORS } from '@/constants';
 
 import { OnboardingScreen } from '@/screens/onboarding/OnboardingScreen';
 import { ProductDetailScreen } from '@/screens/product/ProductDetailScreen';
+import { ConversationScreen } from '@/screens/messages/ConversationScreen';
 import { NotificationsScreen } from '@/screens/notifications/NotificationsScreen';
 import { MembershipScreen } from '@/screens/profile/MembershipScreen';
 import { CreditsScreen } from '@/screens/profile/CreditsScreen';
@@ -69,6 +70,10 @@ export function RootNavigator() {
               headerTintColor: COLORS.onSurface,
               headerShadowVisible: false,
             }}
+          />
+          <Stack.Screen
+            name="Conversation"
+            component={ConversationScreen}
           />
         </>
       ) : (
