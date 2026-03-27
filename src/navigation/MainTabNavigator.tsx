@@ -1,5 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { MainTabParamList } from './types';
 import { HomeScreen } from '@/screens/home/HomeScreen';
 import { ExploreScreen } from '@/screens/explore/ExploreScreen';
@@ -14,6 +15,7 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 
 export function MainTabNavigator() {
   const unreadCount = useNotificationStore((s) => s.unreadCount);
+  const insets = useSafeAreaInsets();
 
   return (
     <Tab.Navigator
@@ -27,12 +29,12 @@ export function MainTabNavigator() {
           elevation: 0,
           shadowOpacity: 0,
           paddingTop: 4,
-          height: 60,
+          height: 60 + insets.bottom,
+          paddingBottom: insets.bottom,
         },
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '500',
-          paddingBottom: 4,
         },
       }}
     >
