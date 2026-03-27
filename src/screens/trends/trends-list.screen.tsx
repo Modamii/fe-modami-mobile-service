@@ -75,7 +75,7 @@ export function TrendsListScreen({ navigation }: Props) {
               <Text className="text-sm text-white/90 mt-2 leading-6">{TRENDS_PAGE_HERO.description}</Text>
               <View className="flex-row flex-wrap gap-2 mt-4">
                 <TouchableOpacity
-                  onPress={() => navigation.navigate('Explore')}
+                  onPress={() => navigation.navigate('Main', { screen: 'Explore' })}
                   className="flex-row items-center gap-2 bg-white rounded-full px-4 py-2.5"
                   activeOpacity={0.85}
                 >
