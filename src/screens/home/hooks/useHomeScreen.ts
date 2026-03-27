@@ -3,6 +3,7 @@ import { useAuthStore, useNotificationStore } from '@/store/app.store';
 import { mockProducts } from '@/data/mock-products.mock';
 import { mockHomeCategories } from '@/data/mock-home-categories.mock';
 import { mockNearbyProducts } from '@/data/mock-nearby-products.mock';
+import { mockTrends } from '@/data/mock-trends.mock';
 import type { Product } from '@/types/app.type';
 
 function getNewArrivals(products: Product[], count = 4): Product[] {
@@ -18,6 +19,7 @@ export function useHomeScreen() {
   const newArrivals = useMemo(() => getNewArrivals(mockProducts), []);
   const categories = useMemo(() => mockHomeCategories, []);
   const nearbyProducts = useMemo(() => mockNearbyProducts, []);
+  const trends = useMemo(() => mockTrends, []);
 
-  return { user, unreadCount, newArrivals, categories, nearbyProducts };
+  return { user, unreadCount, newArrivals, categories, nearbyProducts, trends };
 }

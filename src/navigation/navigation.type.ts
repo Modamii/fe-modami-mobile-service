@@ -21,8 +21,10 @@ export type MainTabParamList = {
 export type RootStackParamList = {
   Onboarding: undefined;
   Auth: undefined;
-  Main: undefined;
+  Main: { screen?: keyof MainTabParamList } | undefined;
   ProductDetail: { productId: string };
+  BlogDetail: { blogId: string };
+  TrendsList: undefined;
   Notifications: undefined;
   Conversation: { conversationId: string; participantName: string };
   Membership: undefined;

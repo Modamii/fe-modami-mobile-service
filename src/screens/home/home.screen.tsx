@@ -9,12 +9,13 @@ import { HomeHeader } from './components/home-header.component';
 import { NewArrivalsSection } from './components/new-arrivals-section.component';
 import { CategorySection } from './components/category-section.component';
 import { NearbySection } from './components/nearby-section.component';
+import { TrendsSection } from './components/trends-section.component';
 import logoDark from '@/assets/logos/logo-text-dark.webp';
 
 type Props = MainTabScreenProps<'Home'>;
 
 export function HomeScreen({ navigation }: Props) {
-  const { user, unreadCount, newArrivals, categories, nearbyProducts } = useHomeScreen();
+  const { user, unreadCount, newArrivals, categories, nearbyProducts, trends } = useHomeScreen();
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -67,6 +68,12 @@ export function HomeScreen({ navigation }: Props) {
         <NearbySection
           data={nearbyProducts}
           onItemPress={() => navigation.navigate('Explore')}
+        />
+
+        <TrendsSection
+          data={trends}
+          onSeeAll={() => navigation.navigate('TrendsList')}
+          onItemPress={(blogId) => navigation.navigate('BlogDetail', { blogId })}
         />
 
         <View className="px-5 pt-4 mb-6">

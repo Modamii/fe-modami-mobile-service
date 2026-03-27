@@ -8,6 +8,8 @@ import { COLORS } from '@/constants/app.constants';
 
 import { OnboardingScreen } from '@/screens/onboarding/onboarding.screen';
 import { ProductDetailScreen } from '@/screens/product/product-detail.screen';
+import { BlogDetailScreen } from '@/screens/blog/blog-detail.screen';
+import { TrendsListScreen } from '@/screens/trends/trends-list.screen';
 import { ConversationScreen } from '@/screens/messages/conversation.screen';
 import { NotificationsScreen } from '@/screens/notifications/notifications.screen';
 import { MembershipScreen } from '@/screens/profile/membership.screen';
@@ -37,6 +39,30 @@ export function RootNavigator() {
         <>
           <Stack.Screen name="Main" component={MainTabNavigator} />
           <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
+          <Stack.Screen
+            name="BlogDetail"
+            component={BlogDetailScreen}
+            options={{
+              headerShown: true,
+              title: 'Bài viết',
+              headerBackButtonDisplayMode: 'minimal',
+              headerStyle: { backgroundColor: COLORS.surface },
+              headerTintColor: COLORS.onSurface,
+              headerShadowVisible: false,
+            }}
+          />
+          <Stack.Screen
+            name="TrendsList"
+            component={TrendsListScreen}
+            options={{
+              headerShown: true,
+              title: 'Xu hướng & cộng đồng',
+              headerBackButtonDisplayMode: 'minimal',
+              headerStyle: { backgroundColor: COLORS.surface },
+              headerTintColor: COLORS.onSurface,
+              headerShadowVisible: false,
+            }}
+          />
           <Stack.Screen
             name="Notifications"
             component={NotificationsScreen}
