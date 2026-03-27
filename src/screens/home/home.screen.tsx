@@ -14,7 +14,7 @@ import logoDark from '@/assets/logos/logo-text-dark.webp';
 type Props = MainTabScreenProps<'Home'>;
 
 export function HomeScreen({ navigation }: Props) {
-  const { unreadCount, newArrivals, categories, nearbyProducts } = useHomeScreen();
+  const { user, unreadCount, newArrivals, categories, nearbyProducts } = useHomeScreen();
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -25,28 +25,29 @@ export function HomeScreen({ navigation }: Props) {
       >
         <HomeHeader
           unreadCount={unreadCount}
+          userFirstName={user?.name?.split(' ')[0]}
           onSearchPress={() => navigation.navigate('Explore')}
           onCreditsPress={() => navigation.navigate('Credits')}
           onNotificationsPress={() => navigation.navigate('Notifications')}
         />
 
-        <View className="mx-5 mb-6 bg-primary rounded-2xl p-5">
+        <View className="mx-5 mb-6 bg-[#214b36] rounded-3xl p-5">
           <Image
             source={logoDark}
             className="mb-2 w-[150px] h-[45px]"
             resizeMode="contain"
           />
-          <Text className="text-white text-2xl font-extrabold leading-tight tracking-tight">
+          <Text className="text-white/90 text-[18px] font-bold my-1">
             Thời trang bền vững{'\n'}từ cộng đồng Curator
           </Text>
-          <Text className="text-white/70 text-sm mt-1">
+          <Text className="text-white/75 text-[13px] font-medium mt-1">
             Khám phá hàng nghìn món đồ được tuyển chọn
           </Text>
           <TouchableOpacity
             onPress={() => navigation.navigate('Explore')}
-            className="bg-white/20 self-start rounded-full px-4 py-2 mt-3"
+            className="bg-[#8ea39a] self-start rounded-full px-4 py-2 mt-2.5"
           >
-            <Text className="text-white text-xs font-semibold uppercase tracking-widest">
+            <Text className="text-white text-[14px] font-semibold">
               Khám phá ngay
             </Text>
           </TouchableOpacity>

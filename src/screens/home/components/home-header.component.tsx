@@ -1,11 +1,13 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { MagnifyingGlassIcon, BellIcon } from 'react-native-heroicons/outline';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
+import { BellIcon } from 'react-native-heroicons/outline';
 import { CreditChip } from '@/components/molecules/credit-chip.component';
 import { COLORS } from '@/constants/app.constants';
+import logoText from '@/assets/logos/modami-logo-text.webp';
 
 interface HomeHeaderProps {
   unreadCount: number;
+  userFirstName?: string;
   onNotificationsPress: () => void;
   onCreditsPress: () => void;
   onSearchPress: () => void;
@@ -13,16 +15,21 @@ interface HomeHeaderProps {
 
 export function HomeHeader({
   unreadCount,
+  userFirstName,
   onNotificationsPress,
   onCreditsPress,
   onSearchPress,
 }: HomeHeaderProps) {
   return (
     <View className="flex-row items-center justify-between px-5 py-4">
-      <TouchableOpacity onPress={onSearchPress} className="flex-row items-center gap-3" activeOpacity={0.7}>
-        <MagnifyingGlassIcon size={22} color={COLORS.primary} />
-        <Text className="text-xl font-extrabold text-primary" style={{ letterSpacing: -0.5 }}>
-          ModaMi
+      <TouchableOpacity onPress={onSearchPress} activeOpacity={0.7}>
+        <Image
+          source={logoText}
+          className="w-[150px] h-[45px]"
+          resizeMode="contain"
+        />
+        <Text className="text-sm text-secondary mt-0.5">
+          Xin chào, {userFirstName ?? 'bạn'} 👋
         </Text>
       </TouchableOpacity>
 
