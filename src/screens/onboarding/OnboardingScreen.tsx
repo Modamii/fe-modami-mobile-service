@@ -9,6 +9,12 @@ import {
   StatusBar,
   Platform,
 } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  FadeInDown,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ShieldCheck,
@@ -216,6 +222,25 @@ function ImpactIllustration({ illustrationH }: Readonly<{ illustrationH: number 
   );
 }
 
+// ─── Animated dot ────────────────────────────────────────────────────────────
+
+function AnimatedDot({ active }: Readonly<{ active: boolean }>) {
+  const dotWidth = useSharedValue(active ? 24 : 8);
+
+  React.useEffect(() => {
+    dotWidth.value = withSpring(active ? 24 : 8, { damping: 14, stiffness: 120 });
+  }, [active, dotWidth]);
+
+  const animStyle = useAnimatedStyle(() => ({ width: dotWidth.value }));
+
+  return (
+    <Animated.View
+      className={`h-2 rounded-full ${active ? 'bg-primary' : 'bg-surface-highest'}`}
+      style={animStyle}
+    />
+  );
+}
+
 // ─── Main screen ─────────────────────────────────────────────────────────────
 
 export function OnboardingScreen(_: Props) {
@@ -295,12 +320,16 @@ export function OnboardingScreen(_: Props) {
           const idx = Math.round(e.nativeEvent.contentOffset.x / width);
           setCurrentIndex(idx);
         }}
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
           <View style={{ width }}>
             {renderIllustration(item.id)}
 
-            {/* Content */}
-            <View className="px-8 pt-7 gap-2.5">
+            {/* Content — fade+slide in when slide becomes visible */}
+            <Animated.View
+              key={`content-${index}`}
+              entering={FadeInDown.duration(350).delay(80)}
+              className="px-8 pt-7 gap-2.5"
+            >
               <Text className="text-[34px] font-black text-on-surface leading-10">{item.title}</Text>
               {renderBody(item)}
 
@@ -314,7 +343,7 @@ export function OnboardingScreen(_: Props) {
                   {item.ctaLabel}{item.ctaArrow ? '  →' : ''}
                 </Text>
               </TouchableOpacity>
-            </View>
+            </Animated.View>
           </View>
         )}
       />
@@ -325,15 +354,7 @@ export function OnboardingScreen(_: Props) {
         style={{ paddingBottom: insets.bottom + 16 }}
       >
         {SLIDES.map((slide, i) => (
-          <View
-            key={slide.id}
-            className={[
-              'rounded-full',
-              i === currentIndex
-                ? 'w-6 h-2 bg-primary'
-                : 'w-2 h-2 bg-surface-highest',
-            ].join(' ')}
-          />
+          <AnimatedDot key={slide.id} active={i === currentIndex} />
         ))}
       </View>
     </View>

@@ -12,5 +12,7 @@ module.exports = {
         extensions: ['.ts', '.tsx', '.js', '.jsx'],
       },
     ],
+    // Must be last — reanimated Babel plugin rewrites worklets for the UI thread
+    'react-native-reanimated/plugin',
   ],
 };
