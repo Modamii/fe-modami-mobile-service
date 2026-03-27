@@ -8,6 +8,7 @@ import { COLORS } from '@/constants/app.constants';
 
 import { OnboardingScreen } from '@/screens/onboarding/onboarding.screen';
 import { ProductDetailScreen } from '@/screens/product/product-detail.screen';
+import { SellerDetailScreen } from '@/screens/seller/seller-detail.screen';
 import { BlogDetailScreen } from '@/screens/blog/blog-detail.screen';
 import { TrendsListScreen } from '@/screens/trends/trends-list.screen';
 import { ConversationScreen } from '@/screens/messages/conversation.screen';
@@ -39,6 +40,7 @@ export function RootNavigator() {
         <>
           <Stack.Screen name="Main" component={MainTabNavigator} />
           <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
+          <Stack.Screen name="SellerDetail" component={SellerDetailScreen} />
           <Stack.Screen
             name="BlogDetail"
             component={BlogDetailScreen}

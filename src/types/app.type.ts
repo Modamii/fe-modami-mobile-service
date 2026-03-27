@@ -168,3 +168,28 @@ export interface Conversation {
   lastMessageAt: string;
   unreadCount: number;
 }
+
+export interface SellerReview {
+  id: string;
+  buyerName: string;
+  buyerInitial: string;
+  rating: number;
+  comment: string;
+  boughtProductTitle: string;
+}
+
+export interface SellerProfile {
+  id: string;
+  displayName: string;
+  username: string;
+  avatarUrl?: string;
+  coverImageUrl: string;
+  bio: string;
+  location: string;
+  joinedAtLabel: string;
+  soldCount: number;
+  isVerified: boolean;
+  rating: number;
+  reviewCount: number;
+  reviews: SellerReview[];
+}

@@ -360,7 +360,13 @@ export function ProductDetailScreen({ navigation, route }: Props) {
 
           <View className="bg-surface rounded-2xl p-4 gap-3" style={cardShadow}>
             <View className="flex-row items-start justify-between gap-3">
-              <View className="flex-row items-center gap-3 flex-1">
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={() => navigation.navigate('SellerDetail', { sellerId: product.sellerId })}
+                className="flex-row items-center gap-3 flex-1"
+                accessibilityRole="button"
+                accessibilityLabel={`Xem cửa hàng ${product.sellerName}`}
+              >
                 <View className="w-12 h-12 rounded-full bg-primary/15 items-center justify-center">
                   <Text className="text-lg font-bold text-primary">{product.sellerName.charAt(0)}</Text>
                 </View>
@@ -379,8 +385,9 @@ export function ProductDetailScreen({ navigation, route }: Props) {
                       <Text className="text-xs text-secondary">Người bán uy tín</Text>
                     </View>
                   )}
+                  <Text className="text-xs font-semibold text-primary mt-1">Xem cửa hàng →</Text>
                 </View>
-              </View>
+              </TouchableOpacity>
               {product.location ? (
                 <View className="flex-row items-center gap-1">
                   <MapPin size={14} color={COLORS.secondary} strokeWidth={2} />

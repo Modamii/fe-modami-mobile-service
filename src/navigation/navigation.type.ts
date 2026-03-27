@@ -23,6 +23,7 @@ export type RootStackParamList = {
   Auth: undefined;
   Main: { screen?: keyof MainTabParamList } | undefined;
   ProductDetail: { productId: string };
+  SellerDetail: { sellerId: string };
   BlogDetail: { blogId: string };
   TrendsList: undefined;
   Notifications: undefined;

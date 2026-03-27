@@ -1,5 +1,5 @@
-import React from 'react';
-import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { Image, ScrollView, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { MainTabScreenProps } from '@/navigation/navigation.type';
 import { ProductCard } from '@/components/molecules/product-card.component';
@@ -14,7 +14,22 @@ import logoDark from '@/assets/logos/logo-text-dark.webp';
 
 type Props = MainTabScreenProps<'Home'>;
 
+const HOME_GRID_GAP = 12;
+const HOME_GRID_COLS = 2;
+
 export function HomeScreen({ navigation }: Props) {
+  const [trendGridRowWidth, setTrendGridRowWidth] = useState(0);
+  const { width: windowWidth } = useWindowDimensions();
+
+  /** Chiều rộng thực của hàng grid (sau px-5) — tránh lệch do windowWidth ≠ vùng ScrollView / làm tròn */
+  const homeGridColumnWidth = useMemo(() => {
+    const available =
+      trendGridRowWidth > 0
+        ? trendGridRowWidth
+        : Math.max(0, windowWidth - 40);
+    return (available - HOME_GRID_GAP * (HOME_GRID_COLS - 1)) / HOME_GRID_COLS;
+  }, [trendGridRowWidth, windowWidth]);
+
   const { user, unreadCount, newArrivals, categories, nearbyProducts, trends } = useHomeScreen();
 
   return (
@@ -80,9 +95,13 @@ export function HomeScreen({ navigation }: Props) {
           <Text className="text-xl font-bold text-on-surface mb-3 tracking-tight">
             Xu hướng tuần này
           </Text>
-          <View className="flex-row flex-wrap gap-3">
+          <View
+            className="flex-row flex-wrap w-full"
+            style={{ gap: HOME_GRID_GAP }}
+            onLayout={(e) => setTrendGridRowWidth(e.nativeEvent.layout.width)}
+          >
             {mockProducts.map((product) => (
-              <View key={product.id} className="w-[47%]">
+              <View key={product.id} style={{ width: homeGridColumnWidth }}>
                 <ProductCard
                   product={product}
                   onPress={(selectedProduct) => {

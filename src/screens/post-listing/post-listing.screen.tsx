@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraIcon } from 'react-native-heroicons/outline';
@@ -26,6 +27,9 @@ const CONDITION_LABELS: Record<string, string> = {
 };
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'One Size', 'Khác'];
+
+const PHOTO_GRID_GAP = 12;
+const PHOTO_GRID_COLS = 3;
 
 function SectionTitle({ children }: Readonly<{ children: string }>) {
   return <Text className="text-sm font-bold text-on-surface uppercase tracking-widest mb-3">{children}</Text>;
@@ -65,6 +69,15 @@ function ChipPicker({
 }
 
 export function PostListingScreen(_props: Props) {
+  const [photoGridRowWidth, setPhotoGridRowWidth] = useState(0);
+  const { width: windowWidth } = useWindowDimensions();
+
+  const photoCellSize = useMemo(() => {
+    const available =
+      photoGridRowWidth > 0 ? photoGridRowWidth : Math.max(0, windowWidth - 40);
+    return (available - PHOTO_GRID_GAP * (PHOTO_GRID_COLS - 1)) / PHOTO_GRID_COLS;
+  }, [photoGridRowWidth, windowWidth]);
+
   const [title, setTitle] = useState('');
   const [price, setPrice] = useState('');
   const [brand, setBrand] = useState('');
@@ -99,11 +112,26 @@ export function PostListingScreen(_props: Props) {
           {/* ── Photos ── */}
           <View className="px-5 pt-4 pb-2">
             <SectionTitle>Ảnh sản phẩm</SectionTitle>
-            <View className="flex-row flex-wrap gap-3">
+            <View
+              className="flex-row flex-wrap w-full"
+              style={{ gap: PHOTO_GRID_GAP }}
+              onLayout={(e) => setPhotoGridRowWidth(e.nativeEvent.layout.width)}
+            >
               {/* Main upload slot */}
               <TouchableOpacity
-                className="w-[110px] h-[110px] bg-surface rounded-2xl items-center justify-center gap-2"
-                style={{ shadowColor: COLORS.onSurface, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 1, borderWidth: 1.5, borderColor: COLORS.outlineVariant, borderStyle: 'dashed' }}
+                className="bg-surface rounded-2xl items-center justify-center gap-2"
+                style={{
+                  width: photoCellSize,
+                  height: photoCellSize,
+                  shadowColor: COLORS.onSurface,
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 8,
+                  elevation: 1,
+                  borderWidth: 1.5,
+                  borderColor: COLORS.outlineVariant,
+                  borderStyle: 'dashed',
+                }}
               >
                 <CameraIcon size={24} color={COLORS.secondary} />
                 <Text className="text-xs text-secondary font-medium">Thêm ảnh</Text>
@@ -113,8 +141,14 @@ export function PostListingScreen(_props: Props) {
               {Array.from({ length: 5 }).map((_, i) => (
                 <View
                   key={i}
-                  className="w-[110px] h-[110px] bg-surface-low rounded-2xl items-center justify-center"
-                  style={{ borderWidth: 1, borderColor: COLORS.outlineVariant, borderStyle: 'dashed' }}
+                  className="bg-surface-low rounded-2xl items-center justify-center"
+                  style={{
+                    width: photoCellSize,
+                    height: photoCellSize,
+                    borderWidth: 1,
+                    borderColor: COLORS.outlineVariant,
+                    borderStyle: 'dashed',
+                  }}
                 >
                   <Text className="text-[11px] text-secondary/50">{i + 2}/6</Text>
                 </View>
