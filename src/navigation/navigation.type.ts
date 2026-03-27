@@ -30,6 +30,7 @@ export type RootStackParamList = {
   Conversation: { conversationId: string; participantName: string };
   Membership: undefined;
   Credits: undefined;
+  Dashboard: undefined;
 };
 
 // ─── Typed props helpers ────────────────────────────────────────────────────

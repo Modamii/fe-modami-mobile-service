@@ -7,6 +7,7 @@ import {
   CreditCardIcon,
   ArrowRightOnRectangleIcon,
   ChevronRightIcon,
+  Squares2X2Icon,
 } from 'react-native-heroicons/outline';
 import type { MainTabScreenProps } from '@/navigation/navigation.type';
 import { useAuthStore } from '@/store/app.store';
@@ -22,6 +23,11 @@ export function ProfileScreen({ navigation }: Props) {
   const tierInfo = MEMBERSHIP_TIERS[user.membershipTier];
 
   const menuItems = [
+    {
+      icon: Squares2X2Icon,
+      label: 'Bảng điều khiển',
+      onPress: () => navigation.navigate('Dashboard'),
+    },
     {
       icon: BellIcon,
       label: 'Thông báo',

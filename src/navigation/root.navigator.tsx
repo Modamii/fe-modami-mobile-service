@@ -15,6 +15,7 @@ import { ConversationScreen } from '@/screens/messages/conversation.screen';
 import { NotificationsScreen } from '@/screens/notifications/notifications.screen';
 import { MembershipScreen } from '@/screens/profile/membership.screen';
 import { CreditsScreen } from '@/screens/profile/credits.screen';
+import { DashboardScreen } from '@/screens/dashboard/dashboard.screen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -96,6 +97,18 @@ export function RootNavigator() {
             options={{
               headerShown: true,
               title: 'ModaMi Credits',
+              headerBackButtonDisplayMode: 'minimal',
+              headerStyle: { backgroundColor: COLORS.surface },
+              headerTintColor: COLORS.onSurface,
+              headerShadowVisible: false,
+            }}
+          />
+          <Stack.Screen
+            name="Dashboard"
+            component={DashboardScreen}
+            options={{
+              headerShown: true,
+              title: 'Bảng điều khiển',
               headerBackButtonDisplayMode: 'minimal',
               headerStyle: { backgroundColor: COLORS.surface },
               headerTintColor: COLORS.onSurface,
