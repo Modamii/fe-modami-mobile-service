@@ -31,6 +31,7 @@ export type RootStackParamList = {
   Membership: undefined;
   Credits: undefined;
   Dashboard: undefined;
+  EditProfile: undefined;
 };
 
 // ─── Typed props helpers ────────────────────────────────────────────────────

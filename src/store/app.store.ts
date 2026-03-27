@@ -69,6 +69,7 @@ export interface AuthState {
   loginWithOAuth: (provider: 'google' | 'apple') => Promise<void>;
   logout: () => void;
   clearAuthError: () => void;
+  updateProfile: (patch: Partial<Pick<User, 'name' | 'bio' | 'location' | 'avatar'>>) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -154,6 +155,17 @@ export const useAuthStore = create<AuthState>()(
       logout: () => {
         useCreditStore.getState().setBalance(0);
         set({ user: null, isAuthenticated: false, authError: null });
+      },
+      updateProfile: (patch) => {
+        set((s) => {
+          if (!s.user) return s;
+          const next: User = { ...s.user, ...patch };
+          const trimmedAvatar = patch.avatar?.trim();
+          if (patch.avatar !== undefined) {
+            next.avatar = trimmedAvatar ? trimmedAvatar : undefined;
+          }
+          return { user: next };
+        });
       },
     }),
     {

@@ -248,9 +248,7 @@ export function DashboardScreen({ navigation }: Props) {
           </Text>
           <View className="bg-surface rounded-3xl overflow-hidden" style={cardShadow}>
             <TouchableOpacity
-              onPress={() =>
-                Alert.alert('Sắp có', 'Chỉnh sửa hồ sơ chi tiết trên web hoặc bản cập nhật sau.')
-              }
+              onPress={() => navigation.navigate('EditProfile')}
               className="flex-row items-center justify-between px-4 py-3.5 border-b border-surface-container"
             >
               <Text className="text-base text-on-surface">Chỉnh sửa hồ sơ</Text>

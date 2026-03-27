@@ -8,6 +8,7 @@ import {
   ArrowRightOnRectangleIcon,
   ChevronRightIcon,
   Squares2X2Icon,
+  PencilSquareIcon,
 } from 'react-native-heroicons/outline';
 import type { MainTabScreenProps } from '@/navigation/navigation.type';
 import { useAuthStore } from '@/store/app.store';
@@ -27,6 +28,11 @@ export function ProfileScreen({ navigation }: Props) {
       icon: Squares2X2Icon,
       label: 'Bảng điều khiển',
       onPress: () => navigation.navigate('Dashboard'),
+    },
+    {
+      icon: PencilSquareIcon,
+      label: 'Chỉnh sửa hồ sơ',
+      onPress: () => navigation.navigate('EditProfile'),
     },
     {
       icon: BellIcon,

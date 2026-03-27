@@ -16,6 +16,7 @@ import { NotificationsScreen } from '@/screens/notifications/notifications.scree
 import { MembershipScreen } from '@/screens/profile/membership.screen';
 import { CreditsScreen } from '@/screens/profile/credits.screen';
 import { DashboardScreen } from '@/screens/dashboard/dashboard.screen';
+import { EditProfileScreen } from '../screens/profile/edit-profile.screen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -109,6 +110,18 @@ export function RootNavigator() {
             options={{
               headerShown: true,
               title: 'Bảng điều khiển',
+              headerBackButtonDisplayMode: 'minimal',
+              headerStyle: { backgroundColor: COLORS.surface },
+              headerTintColor: COLORS.onSurface,
+              headerShadowVisible: false,
+            }}
+          />
+          <Stack.Screen
+            name="EditProfile"
+            component={EditProfileScreen}
+            options={{
+              headerShown: true,
+              title: 'Chỉnh sửa hồ sơ',
               headerBackButtonDisplayMode: 'minimal',
               headerStyle: { backgroundColor: COLORS.surface },
               headerTintColor: COLORS.onSurface,
