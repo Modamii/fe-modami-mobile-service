@@ -266,3 +266,20 @@ export const useMembershipStore = create<MembershipState>()(
     },
   ),
 );
+
+// ─── App Store (onboarding, global flags) ──────────────────────────────────
+
+interface AppState {
+  hasSeenOnboarding: boolean;
+  markOnboardingDone: () => void;
+}
+
+export const useAppStore = create<AppState>()(
+  persist(
+    (set) => ({
+      hasSeenOnboarding: false,
+      markOnboardingDone: () => set({ hasSeenOnboarding: true }),
+    }),
+    { name: 'modami-app', storage },
+  ),
+);

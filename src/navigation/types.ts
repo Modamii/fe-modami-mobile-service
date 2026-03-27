@@ -19,6 +19,7 @@ export type MainTabParamList = {
 
 // ─── Root Stack ────────────────────────────────────────────────────────────
 export type RootStackParamList = {
+  Onboarding: undefined;
   Auth: undefined;
   Main: undefined;
   ProductDetail: { productId: string };
