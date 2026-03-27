@@ -7,6 +7,7 @@ import { useAuthStore, useAppStore } from '@/store';
 import { COLORS } from '@/constants';
 
 import { OnboardingScreen } from '@/screens/onboarding/OnboardingScreen';
+import { ProductDetailScreen } from '@/screens/product/ProductDetailScreen';
 import { NotificationsScreen } from '@/screens/notifications/NotificationsScreen';
 import { MembershipScreen } from '@/screens/profile/MembershipScreen';
 import { CreditsScreen } from '@/screens/profile/CreditsScreen';
@@ -34,6 +35,7 @@ export function RootNavigator() {
       ) : isAuthenticated ? (
         <>
           <Stack.Screen name="Main" component={MainTabNavigator} />
+          <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
           <Stack.Screen
             name="Notifications"
             component={NotificationsScreen}
