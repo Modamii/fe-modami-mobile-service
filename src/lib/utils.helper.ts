@@ -12,6 +12,15 @@ export function formatPrice(amount: number): string {
   }).format(amount);
 }
 
+/** Format price in short form: 250000 → "250k", 1500000 → "1.5tr" */
+export function formatPriceShort(amount: number): string {
+  if (amount >= 1_000_000) {
+    const tr = amount / 1_000_000;
+    return `${tr % 1 === 0 ? tr : tr.toFixed(1)}tr`;
+  }
+  return `${Math.round(amount / 1000)}k`;
+}
+
 /** Relative time (e.g., "2 giờ trước") */
 export function timeAgo(isoString: string): string {
   const now = Date.now();

@@ -9,7 +9,8 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Camera, CheckCircle2 } from 'lucide-react-native';
+import { CameraIcon } from 'react-native-heroicons/outline';
+import { CheckCircleIcon } from 'react-native-heroicons/solid';
 import type { MainTabScreenProps } from '@/navigation/navigation.type';
 import { Button } from '@/components/ui/button.component';
 import { Input } from '@/components/ui/input.component';
@@ -104,7 +105,7 @@ export function PostListingScreen(_props: Props) {
                 className="w-[110px] h-[110px] bg-surface rounded-2xl items-center justify-center gap-2"
                 style={{ shadowColor: COLORS.onSurface, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 1, borderWidth: 1.5, borderColor: COLORS.outlineVariant, borderStyle: 'dashed' }}
               >
-                <Camera size={24} color={COLORS.secondary} strokeWidth={1.5} />
+                <CameraIcon size={24} color={COLORS.secondary} />
                 <Text className="text-xs text-secondary font-medium">Thêm ảnh</Text>
               </TouchableOpacity>
 
@@ -175,11 +176,9 @@ export function PostListingScreen(_props: Props) {
                     className={`flex-row items-center gap-3 rounded-xl px-4 py-3 ${isSelected ? 'bg-primary/10' : 'bg-surface'}`}
                     style={isSelected ? undefined : { shadowColor: COLORS.onSurface, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1 }}
                   >
-                    <CheckCircle2
+                    <CheckCircleIcon
                       size={20}
                       color={isSelected ? COLORS.primary : COLORS.outlineVariant}
-                      fill={isSelected ? COLORS.primary : 'none'}
-                      strokeWidth={2}
                     />
                     <View className="flex-1">
                       <Text className={`text-sm font-semibold ${isSelected ? 'text-primary' : 'text-on-surface'}`}>

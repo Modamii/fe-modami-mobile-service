@@ -1,30 +1,45 @@
 import React from 'react';
 import {
-  Home,
-  Search,
-  PlusCircle,
-  MessageCircle,
-  User,
-} from 'lucide-react-native';
+  HomeIcon,
+  MagnifyingGlassIcon,
+  PlusCircleIcon,
+  ChatBubbleOvalLeftIcon,
+  UserIcon,
+} from 'react-native-heroicons/outline';
+import {
+  HomeIcon as HomeIconSolid,
+  MagnifyingGlassIcon as MagnifyingGlassIconSolid,
+  PlusCircleIcon as PlusCircleIconSolid,
+  ChatBubbleOvalLeftIcon as ChatBubbleOvalLeftIconSolid,
+  UserIcon as UserIconSolid,
+} from 'react-native-heroicons/solid';
 
-type IconName = 'home' | 'search' | 'plus-circle' | 'message-circle' | 'user';
+type TabIconName = 'home' | 'search' | 'plus-circle' | 'message-circle' | 'user';
 
 interface TabBarIconProps {
-  name: IconName;
+  name: TabIconName;
   color: string;
   focused: boolean;
   size?: number;
 }
 
-const icons: Record<IconName, React.ElementType> = {
-  home: Home,
-  search: Search,
-  'plus-circle': PlusCircle,
-  'message-circle': MessageCircle,
-  user: User,
+const OUTLINE_ICONS: Record<TabIconName, React.ElementType> = {
+  home: HomeIcon,
+  search: MagnifyingGlassIcon,
+  'plus-circle': PlusCircleIcon,
+  'message-circle': ChatBubbleOvalLeftIcon,
+  user: UserIcon,
 };
 
-export function TabBarIcon({ name, color, size = 22 }: TabBarIconProps) {
-  const Icon = icons[name];
-  return <Icon color={color} size={size} strokeWidth={2} />;
+const SOLID_ICONS: Record<TabIconName, React.ElementType> = {
+  home: HomeIconSolid,
+  search: MagnifyingGlassIconSolid,
+  'plus-circle': PlusCircleIconSolid,
+  'message-circle': ChatBubbleOvalLeftIconSolid,
+  user: UserIconSolid,
+};
+
+export function TabBarIcon({ name, color, focused, size = 22 }: TabBarIconProps) {
+  const Icon = focused ? SOLID_ICONS[name] : OUTLINE_ICONS[name];
+  return <Icon size={size} color={color} />;
 }

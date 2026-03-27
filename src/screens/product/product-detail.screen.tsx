@@ -7,9 +7,17 @@ import {
   TouchableOpacity,
   Platform,
   Alert,
+  useWindowDimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  useSharedValue,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  interpolate,
+  Extrapolation,
+} from 'react-native-reanimated';
 import {
   ChevronLeft,
   Heart,
@@ -45,11 +53,18 @@ const cardShadow = Platform.select({
   android: { elevation: 2 },
 });
 
+const IMAGE_HEIGHT = 420;
+
 export function ProductDetailScreen({ navigation, route }: Props) {
   const { productId } = route.params;
   const insets = useSafeAreaInsets();
-  const [isFavorited, setIsFavorited] = useState(false);
+  const { width: screenWidth } = useWindowDimensions();
   const [imageIndex, setImageIndex] = useState(0);
+
+  const scrollY = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler((event) => {
+    scrollY.value = event.contentOffset.y;
+  });
 
   const balance = useCreditStore((s) => s.balance);
   const deductCredit = useCreditStore((s) => s.deductCredit);
@@ -59,6 +74,20 @@ export function ProductDetailScreen({ navigation, route }: Props) {
   const isFav = useProductStore((s) => s.isFavorited(productId));
 
   const product = mockProducts.find((p) => p.id === productId);
+
+  // Parallax: image moves up at 40% of scroll speed
+  const imageParallaxStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        translateY: interpolate(
+          scrollY.value,
+          [0, IMAGE_HEIGHT],
+          [0, -IMAGE_HEIGHT * 0.4],
+          Extrapolation.CLAMP
+        ),
+      },
+    ],
+  }));
 
   if (!product) {
     return (
@@ -100,70 +129,36 @@ export function ProductDetailScreen({ navigation, route }: Props) {
 
   return (
     <View className="flex-1 bg-background">
-      {/* ── Image gallery ── */}
-      <View className="relative">
+
+      {/* ── Parallax image — sits behind scrollable content ── */}
+      <Animated.View
+        style={[
+          { position: 'absolute', top: 0, left: 0, right: 0, height: IMAGE_HEIGHT },
+          imageParallaxStyle,
+        ]}
+      >
         <ScrollView
           horizontal
           pagingEnabled
           showsHorizontalScrollIndicator={false}
           onMomentumScrollEnd={(e) => {
-            const idx = Math.round(e.nativeEvent.contentOffset.x / e.nativeEvent.layoutMeasurement.width);
+            const idx = Math.round(
+              e.nativeEvent.contentOffset.x / e.nativeEvent.layoutMeasurement.width
+            );
             setImageIndex(idx);
           }}
           className="bg-surface-container"
-          style={{ height: 420 }}
+          style={{ height: IMAGE_HEIGHT }}
         >
           {product.images.map((uri, i) => (
             <Image
               key={i}
               source={{ uri }}
-              style={{ width: 400, height: 420 }}
+              style={{ width: screenWidth, height: IMAGE_HEIGHT }}
               resizeMode="cover"
             />
           ))}
         </ScrollView>
-
-        {/* Gradient overlay at bottom */}
-        <View
-          className="absolute bottom-0 left-0 right-0 h-20"
-          style={{ background: 'transparent' }}
-          pointerEvents="none"
-        />
-
-        {/* Top controls — back + actions */}
-        <View
-          className="absolute left-0 right-0 flex-row items-center justify-between px-4"
-          style={{ top: insets.top + 8 }}
-        >
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            className="w-10 h-10 rounded-full bg-surface/90 items-center justify-center"
-            style={cardShadow}
-          >
-            <ChevronLeft size={22} color={COLORS.onSurface} strokeWidth={2.5} />
-          </TouchableOpacity>
-
-          <View className="flex-row gap-2">
-            <TouchableOpacity
-              className="w-10 h-10 rounded-full bg-surface/90 items-center justify-center"
-              style={cardShadow}
-            >
-              <Share2 size={18} color={COLORS.onSurface} strokeWidth={2} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => toggleFavorite(productId)}
-              className="w-10 h-10 rounded-full bg-surface/90 items-center justify-center"
-              style={cardShadow}
-            >
-              <Heart
-                size={18}
-                color={isFav ? '#e84040' : COLORS.onSurface}
-                fill={isFav ? '#e84040' : 'none'}
-                strokeWidth={2}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
 
         {/* Image dots */}
         {product.images.length > 1 && (
@@ -183,15 +178,56 @@ export function ProductDetailScreen({ navigation, route }: Props) {
             {CONDITION_LABEL[product.condition] ?? product.condition}
           </Text>
         </View>
+      </Animated.View>
+
+      {/* ── Fixed header controls — always on top ── */}
+      <View
+        className="absolute left-0 right-0 flex-row items-center justify-between px-4 z-10"
+        style={{ top: insets.top + 8 }}
+        pointerEvents="box-none"
+      >
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          className="w-10 h-10 rounded-full bg-surface/90 items-center justify-center"
+          style={cardShadow}
+        >
+          <ChevronLeft size={22} color={COLORS.onSurface} strokeWidth={2.5} />
+        </TouchableOpacity>
+
+        <View className="flex-row gap-2">
+          <TouchableOpacity
+            className="w-10 h-10 rounded-full bg-surface/90 items-center justify-center"
+            style={cardShadow}
+          >
+            <Share2 size={18} color={COLORS.onSurface} strokeWidth={2} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => toggleFavorite(productId)}
+            className="w-10 h-10 rounded-full bg-surface/90 items-center justify-center"
+            style={cardShadow}
+          >
+            <Heart
+              size={18}
+              color={isFav ? '#e84040' : COLORS.onSurface}
+              fill={isFav ? '#e84040' : 'none'}
+              strokeWidth={2}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
 
-      {/* ── Content ── */}
-      <ScrollView
-        className="flex-1"
+      {/* ── Scrollable content — slides over the parallax image ── */}
+      <Animated.ScrollView
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
       >
-        <View className="px-5 pt-5 gap-4">
+        {/* Transparent spacer — reveals image underneath */}
+        <View style={{ height: IMAGE_HEIGHT }} />
+
+        {/* Content card — bg-background covers image as user scrolls */}
+        <View className="px-5 pt-5 gap-4 bg-background">
           {/* Title + price */}
           <View className="gap-1">
             <Text className="text-[22px] font-bold text-on-surface leading-snug">{product.title}</Text>
@@ -292,7 +328,7 @@ export function ProductDetailScreen({ navigation, route }: Props) {
             )}
           </View>
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
 
       {/* ── Bottom CTA ── */}
       <View

@@ -1,31 +1,34 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
-  Image,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
 } from 'react-native';
+import { ChevronLeftIcon } from 'react-native-heroicons/outline';
 import type { AuthStackScreenProps } from '@/navigation/navigation.type';
 import { Button } from '@/components/ui/button.component';
 import { Input } from '@/components/ui/input.component';
-import { useAuthStore } from '@/store/app.store';
-import logo from '@/assets/logos/modami-logo-text.webp';
+import { COLORS } from '@/constants/app.constants';
+import { useRegisterScreen } from './hooks/useRegisterScreen';
+import { AuthBrand } from './components/auth-brand.component';
 
 type Props = AuthStackScreenProps<'Register'>;
 
 export function RegisterScreen({ navigation }: Props) {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const { register, isLoading, authError, clearAuthError } = useAuthStore();
-
-  const handleRegister = async () => {
-    clearAuthError();
-    await register(email, password, name);
-  };
+  const {
+    name,
+    setName,
+    email,
+    setEmail,
+    password,
+    setPassword,
+    isLoading,
+    authError,
+    handleRegister,
+  } = useRegisterScreen();
 
   return (
     <KeyboardAvoidingView
@@ -38,17 +41,22 @@ export function RegisterScreen({ navigation }: Props) {
         keyboardShouldPersistTaps="handled"
       >
         <View className="mb-10">
-          <TouchableOpacity onPress={() => navigation.goBack()} className="mb-5">
-            <Text className="text-primary font-medium">← Quay lại</Text>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            className="flex-row items-center gap-1 mb-5"
+            hitSlop={8}
+          >
+            <ChevronLeftIcon size={18} color={COLORS.primary} />
+            <Text className="text-primary font-medium">Quay lại</Text>
           </TouchableOpacity>
-          <Image
-            source={logo}
-            style={{ width: 160, height: 48 }}
-            resizeMode="contain"
-            className="mb-3"
-          />
-          <Text className="text-3xl font-bold text-on-surface tracking-tight">Tạo tài khoản</Text>
-          <Text className="text-base text-secondary mt-1">Bắt đầu hành trình thời trang của bạn</Text>
+
+          <AuthBrand compact />
+          <Text className="text-3xl font-bold text-on-surface tracking-tight mt-3">
+            Tạo tài khoản
+          </Text>
+          <Text className="text-base text-secondary mt-1">
+            Bắt đầu hành trình thời trang của bạn
+          </Text>
         </View>
 
         <View className="gap-4">

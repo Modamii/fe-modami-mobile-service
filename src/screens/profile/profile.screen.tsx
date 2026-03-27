@@ -1,7 +1,13 @@
 import React from 'react';
 import { View, Text, Image, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Bell, Crown, CreditCard, LogOut, ChevronRight } from 'lucide-react-native';
+import {
+  BellIcon,
+  TrophyIcon,
+  CreditCardIcon,
+  ArrowRightOnRectangleIcon,
+  ChevronRightIcon,
+} from 'react-native-heroicons/outline';
 import type { MainTabScreenProps } from '@/navigation/navigation.type';
 import { useAuthStore } from '@/store/app.store';
 import { CreditChip } from '@/components/molecules/credit-chip.component';
@@ -17,17 +23,17 @@ export function ProfileScreen({ navigation }: Props) {
 
   const menuItems = [
     {
-      icon: Bell,
+      icon: BellIcon,
       label: 'Thông báo',
       onPress: () => navigation.navigate('Notifications'),
     },
     {
-      icon: CreditCard,
+      icon: CreditCardIcon,
       label: 'ModaMi Credits',
       onPress: () => navigation.navigate('Credits'),
     },
     {
-      icon: Crown,
+      icon: TrophyIcon,
       label: 'Gói thành viên',
       onPress: () => navigation.navigate('Membership'),
     },
@@ -78,9 +84,9 @@ export function ProfileScreen({ navigation }: Props) {
               className={`flex-row items-center px-5 py-4 gap-3 ${index < menuItems.length - 1 ? 'border-b border-surface-container' : ''}`}
               activeOpacity={0.7}
             >
-              <item.icon size={20} color={COLORS.primary} strokeWidth={2} />
+              <item.icon size={20} color={COLORS.primary} />
               <Text className="flex-1 text-base text-on-surface">{item.label}</Text>
-              <ChevronRight size={16} color={COLORS.secondary} strokeWidth={2} />
+              <ChevronRightIcon size={16} color={COLORS.secondary} />
             </TouchableOpacity>
           ))}
         </View>
@@ -91,7 +97,7 @@ export function ProfileScreen({ navigation }: Props) {
           className="mx-5 mt-4 flex-row items-center gap-3 bg-surface rounded-2xl px-5 py-4 mb-6"
           activeOpacity={0.7}
         >
-          <LogOut size={20} color="#ef4444" strokeWidth={2} />
+          <ArrowRightOnRectangleIcon size={20} color="#ef4444" />
           <Text className="text-base text-red-500 font-medium">Đăng xuất</Text>
         </TouchableOpacity>
       </ScrollView>

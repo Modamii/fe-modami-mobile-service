@@ -1,7 +1,14 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { Infinity, Zap, Crown, ShieldCheck, ArrowDownLeft, ArrowUpRight } from 'lucide-react-native';
+import {
+  SparklesIcon,
+  BoltIcon,
+  ShieldCheckIcon,
+  ArrowDownLeftIcon,
+  ArrowUpRightIcon,
+  TrophyIcon,
+} from 'react-native-heroicons/outline';
 import type { RootStackScreenProps } from '@/navigation/navigation.type';
 import { useCreditStore } from '@/store/app.store';
 import { formatCredits } from '@/lib/utils.helper';
@@ -56,7 +63,7 @@ export function CreditsScreen(_props: Props) {
           />
 
           <View className="flex-row items-center gap-2 mb-4">
-            <Infinity size={16} color="rgba(255,255,255,0.7)" strokeWidth={2} />
+            <SparklesIcon size={16} color="rgba(255,255,255,0.7)" />
             <Text className="text-white/70 text-sm font-medium uppercase tracking-widest">M-Credit</Text>
           </View>
 
@@ -65,11 +72,11 @@ export function CreditsScreen(_props: Props) {
 
           <View className="flex-row gap-2 mt-5">
             <View className="flex-row items-center gap-1.5 bg-white/15 rounded-full px-3 py-1.5">
-              <ShieldCheck size={12} color="rgba(255,255,255,0.8)" strokeWidth={2} />
+              <ShieldCheckIcon size={12} color="rgba(255,255,255,0.8)" />
               <Text className="text-white/80 text-xs font-medium">Không hết hạn</Text>
             </View>
             <View className="flex-row items-center gap-1.5 bg-white/15 rounded-full px-3 py-1.5">
-              <Zap size={12} color="rgba(255,255,255,0.8)" strokeWidth={2} />
+              <BoltIcon size={12} color="rgba(255,255,255,0.8)" />
               <Text className="text-white/80 text-xs font-medium">Dùng ngay</Text>
             </View>
           </View>
@@ -105,7 +112,7 @@ export function CreditsScreen(_props: Props) {
             >
               <View className="flex-row items-center gap-3">
                 <View className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center">
-                  <Infinity size={18} color={COLORS.primary} strokeWidth={2.5} />
+                  <SparklesIcon size={18} color={COLORS.primary} />
                 </View>
                 <View>
                   <View className="flex-row items-center gap-2">
@@ -144,8 +151,8 @@ export function CreditsScreen(_props: Props) {
               <View className="flex-row items-center px-4 py-3 gap-3">
                 <View className={`w-9 h-9 rounded-full items-center justify-center ${item.type === 'earn' ? 'bg-primary/10' : 'bg-surface-container'}`}>
                   {item.type === 'earn'
-                    ? <ArrowDownLeft size={16} color={COLORS.primary} strokeWidth={2.5} />
-                    : <ArrowUpRight size={16} color={COLORS.secondary} strokeWidth={2.5} />
+                    ? <ArrowDownLeftIcon size={16} color={COLORS.primary} />
+                    : <ArrowUpRightIcon size={16} color={COLORS.secondary} />
                   }
                 </View>
                 <View className="flex-1">
@@ -165,7 +172,7 @@ export function CreditsScreen(_props: Props) {
       <Animated.View entering={FadeInDown.duration(350).delay(320)} className="mx-5 mt-4">
         <View className="bg-[#1a2e3d] rounded-2xl p-5 flex-row items-center gap-4">
           <View className="w-12 h-12 rounded-full bg-white/10 items-center justify-center">
-            <Crown size={22} color="#d4af37" strokeWidth={2} />
+            <TrophyIcon size={22} color="#d4af37" />
           </View>
           <View className="flex-1">
             <Text className="text-white font-bold text-sm">Nâng cấp lên Style / Elite</Text>

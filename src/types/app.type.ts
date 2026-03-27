@@ -60,6 +60,24 @@ export interface Message {
   isRead: boolean;
 }
 
+export interface HomeCategory {
+  id: string;
+  label: string;
+  image: string;
+  category: string;
+}
+
+export interface NearbyProduct {
+  id: string;
+  title: string;
+  price: number;
+  image: string;
+  locationLabel: string;
+  sellerName: string;
+  sellerAvatarColor: string;
+  distance: string;
+}
+
 export interface Conversation {
   id: string;
   participantId: string;

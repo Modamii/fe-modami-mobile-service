@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { Infinity } from 'lucide-react-native';
+import { SparklesIcon } from 'react-native-heroicons/outline';
 import { useCreditStore } from '@/store/app.store';
 import { formatCredits } from '@/lib/utils.helper';
 import { COLORS } from '@/constants/app.constants';
@@ -18,7 +18,7 @@ export function CreditChip({ onPress }: CreditChipProps) {
       activeOpacity={0.8}
       className="flex-row items-center gap-1 bg-primary-container/20 rounded-full px-3 py-1.5"
     >
-      <Infinity size={14} color={COLORS.primary} strokeWidth={2.5} />
+      <SparklesIcon size={14} color={COLORS.primary} />
       <Text className="text-sm font-semibold text-primary">
         {formatCredits(balance)}
       </Text>

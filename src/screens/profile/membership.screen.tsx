@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import { Check } from 'lucide-react-native';
+import { CheckIcon } from 'react-native-heroicons/solid';
 import type { RootStackScreenProps } from '@/navigation/navigation.type';
 import { useAuthStore, useMembershipStore } from '@/store/app.store';
 import { COLORS } from '@/constants/app.constants';
@@ -82,7 +82,7 @@ export function MembershipScreen(_props: Props) {
             <View className="gap-2">
               {plan.perks.map((perk) => (
                 <View key={perk} className="flex-row items-center gap-2">
-                  <Check size={16} color={COLORS.primary} strokeWidth={2.5} />
+                  <CheckIcon size={16} color={COLORS.primary} />
                   <Text className="text-sm text-secondary">{perk}</Text>
                 </View>
               ))}

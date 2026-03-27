@@ -17,14 +17,13 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  ShieldCheck,
-  QrCode,
-  Infinity,
-  Leaf,
-  BadgeCheck,
-  IdCard,
-  MapPin,
-} from 'lucide-react-native';
+  ShieldCheckIcon,
+  QrCodeIcon,
+  SparklesIcon,
+  CheckBadgeIcon,
+  IdentificationIcon,
+  MapPinIcon,
+} from 'react-native-heroicons/outline';
 import type { RootStackScreenProps } from '@/navigation/navigation.type';
 import { useAppStore } from '@/store/app.store';
 import { COLORS } from '@/constants/app.constants';
@@ -135,25 +134,25 @@ function TrustIllustration({ illustrationH }: Readonly<{ illustrationH: number }
         {/* Shield circle */}
         <View className="relative items-center justify-center">
           <View className="w-[140px] h-[140px] rounded-full bg-primary items-center justify-center">
-            <ShieldCheck size={72} color="#ffffff" strokeWidth={1.5} />
+            <ShieldCheckIcon size={72} color="#ffffff" />
           </View>
           {/* QR badge */}
           <View className="absolute -bottom-1 -right-1 w-10 h-10 rounded-[10px] bg-surface items-center justify-center border-2 border-surface-container">
-            <QrCode size={18} color={COLORS.primary} strokeWidth={2} />
+            <QrCodeIcon size={18} color={COLORS.primary} />
           </View>
         </View>
 
         {/* eKYC form fields */}
         <View className="gap-2.5 w-[240px]">
           <View className="flex-row items-center gap-2.5 bg-surface rounded-[10px] px-3.5 py-3" style={formShadow}>
-            <IdCard size={18} color={COLORS.secondary} strokeWidth={1.5} />
+            <IdentificationIcon size={18} color={COLORS.secondary} />
             <View className="flex-1 h-2 rounded bg-surface-container" />
-            <BadgeCheck size={18} color={COLORS.primary} strokeWidth={2} />
+            <CheckBadgeIcon size={18} color={COLORS.primary} />
           </View>
           <View className="flex-row items-center gap-2.5 bg-surface rounded-[10px] px-3.5 py-3" style={formShadow}>
-            <MapPin size={18} color={COLORS.secondary} strokeWidth={1.5} />
+            <MapPinIcon size={18} color={COLORS.secondary} />
             <View className="w-[60%] h-2 rounded bg-surface-container" />
-            <BadgeCheck size={18} color={COLORS.primary} strokeWidth={2} />
+            <CheckBadgeIcon size={18} color={COLORS.primary} />
           </View>
         </View>
       </View>
@@ -183,7 +182,7 @@ function CreditIllustration({ illustrationH }: Readonly<{ illustrationH: number 
         <View className="bg-white/95 rounded-[10px] px-3 py-2 self-start">
           <Text className="text-[8px] font-semibold text-secondary uppercase tracking-widest mb-[3px]">SỐ DƯ</Text>
           <View className="flex-row items-center gap-1.5">
-            <Infinity size={16} color={COLORS.primary} strokeWidth={2.5} />
+            <SparklesIcon size={16} color={COLORS.primary} />
             <Text className="text-[13px] font-bold text-on-surface">50 M-Credit</Text>
           </View>
         </View>
@@ -214,7 +213,7 @@ function ImpactIllustration({ illustrationH }: Readonly<{ illustrationH: number 
           className="absolute flex-row items-center gap-1.5 bg-background/90 px-4 py-2.5 rounded-[10px]"
           style={{ bottom: 20, right: -12, ...badgeShadow }}
         >
-          <Leaf size={14} color={COLORS.primary} strokeWidth={2} />
+          <SparklesIcon size={14} color={COLORS.primary} />
           <Text className="text-[9px] font-semibold text-primary uppercase tracking-widest">SỐNG XANH CÙNG MI</Text>
         </View>
       </View>

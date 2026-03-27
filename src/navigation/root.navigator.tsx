@@ -43,6 +43,7 @@ export function RootNavigator() {
             options={{
               headerShown: true,
               title: 'Thông báo',
+              headerBackButtonDisplayMode: 'minimal',
               headerStyle: { backgroundColor: COLORS.surface },
               headerTintColor: COLORS.onSurface,
               headerShadowVisible: false,
@@ -55,6 +56,7 @@ export function RootNavigator() {
             options={{
               headerShown: true,
               title: 'Gói thành viên',
+              headerBackButtonDisplayMode: 'minimal',
               headerStyle: { backgroundColor: COLORS.surface },
               headerTintColor: COLORS.onSurface,
               headerShadowVisible: false,
@@ -66,6 +68,7 @@ export function RootNavigator() {
             options={{
               headerShown: true,
               title: 'ModaMi Credits',
+              headerBackButtonDisplayMode: 'minimal',
               headerStyle: { backgroundColor: COLORS.surface },
               headerTintColor: COLORS.onSurface,
               headerShadowVisible: false,

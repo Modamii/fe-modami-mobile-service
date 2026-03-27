@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
-import { Lock } from 'lucide-react-native';
+import { LockClosedIcon } from 'react-native-heroicons/solid';
 import type { Product } from '@/types/app.type';
 import { formatPrice } from '@/lib/utils.helper';
 import { COLORS } from '@/constants/app.constants';
@@ -26,7 +26,7 @@ export function ProductCard({ product, onPress }: ProductCardProps) {
         />
         {product.isUnlockRequired && (
           <View className="absolute top-2 right-2 bg-on-surface/60 rounded-full p-1.5">
-            <Lock size={12} color="#fff" />
+            <LockClosedIcon size={12} color="#fff" />
           </View>
         )}
       </View>

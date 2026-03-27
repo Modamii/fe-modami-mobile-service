@@ -12,14 +12,14 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import {
-  ChevronLeft,
-  Send,
-  ImageIcon,
-  Phone,
-  MoreVertical,
-  Check,
-  CheckCheck,
-} from 'lucide-react-native';
+  ChevronLeftIcon,
+  PaperAirplaneIcon,
+  PhotoIcon,
+  PhoneIcon,
+  EllipsisVerticalIcon,
+  CheckIcon,
+  CheckBadgeIcon,
+} from 'react-native-heroicons/outline';
 import type { RootStackScreenProps } from '@/navigation/navigation.type';
 import { useAuthStore } from '@/store/app.store';
 import { COLORS } from '@/constants/app.constants';
@@ -153,9 +153,9 @@ function ProductContextCard({ product }: Readonly<{ product: NonNullable<ChatMes
 }
 
 function StatusIcon({ status }: Readonly<{ status: MessageStatus }>) {
-  if (status === 'sent') return <Check size={12} color={COLORS.secondary} strokeWidth={2.5} />;
-  if (status === 'delivered') return <CheckCheck size={12} color={COLORS.secondary} strokeWidth={2.5} />;
-  return <CheckCheck size={12} color="#60a5fa" strokeWidth={2.5} />;
+  if (status === 'sent') return <CheckIcon size={12} color={COLORS.secondary} />;
+  if (status === 'delivered') return <CheckBadgeIcon size={12} color={COLORS.secondary} />;
+  return <CheckBadgeIcon size={12} color="#60a5fa" />;
 }
 
 function MessageBubble({ message, isMe }: Readonly<{ message: ChatMessage; isMe: boolean }>) {
@@ -234,7 +234,7 @@ export function ConversationScreen({ navigation, route }: Props) {
         style={{ paddingTop: insets.top + 8 }}
       >
         <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={12}>
-          <ChevronLeft size={24} color={COLORS.onSurface} strokeWidth={2.5} />
+          <ChevronLeftIcon size={24} color={COLORS.onSurface} />
         </TouchableOpacity>
 
         {/* Avatar */}
@@ -252,10 +252,10 @@ export function ConversationScreen({ navigation, route }: Props) {
         </View>
 
         <TouchableOpacity hitSlop={12}>
-          <Phone size={20} color={COLORS.secondary} strokeWidth={2} />
+          <PhoneIcon size={20} color={COLORS.secondary} />
         </TouchableOpacity>
         <TouchableOpacity hitSlop={12}>
-          <MoreVertical size={20} color={COLORS.secondary} strokeWidth={2} />
+          <EllipsisVerticalIcon size={20} color={COLORS.secondary} />
         </TouchableOpacity>
       </View>
 
@@ -294,7 +294,7 @@ export function ConversationScreen({ navigation, route }: Props) {
           style={{ paddingBottom: insets.bottom + 8 }}
         >
           <TouchableOpacity className="pb-2.5" hitSlop={12}>
-            <ImageIcon size={22} color={COLORS.secondary} strokeWidth={2} />
+            <PhotoIcon size={22} color={COLORS.secondary} />
           </TouchableOpacity>
 
           <View className="flex-1 bg-surface-low rounded-2xl px-4 py-2.5 min-h-[44px] justify-center">
@@ -317,10 +317,9 @@ export function ConversationScreen({ navigation, route }: Props) {
             className={`w-10 h-10 rounded-full items-center justify-center mb-0.5 ${inputText.trim() ? 'bg-primary' : 'bg-surface-container'}`}
             style={inputText.trim() ? { shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 8, elevation: 3 } : undefined}
           >
-            <Send
+            <PaperAirplaneIcon
               size={18}
               color={inputText.trim() ? '#ffffff' : COLORS.secondary}
-              strokeWidth={2}
             />
           </TouchableOpacity>
         </View>
