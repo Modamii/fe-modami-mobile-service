@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Infinity } from 'lucide-react-native';
-import { useCreditStore } from '@/store';
-import { formatCredits } from '@/lib/utils';
-import { COLORS } from '@/constants';
+import { useCreditStore } from '@/store/app.store';
+import { formatCredits } from '@/lib/utils.helper';
+import { COLORS } from '@/constants/app.constants';
 
 interface CreditChipProps {
   onPress?: () => void;

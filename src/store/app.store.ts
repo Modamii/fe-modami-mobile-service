@@ -8,10 +8,10 @@ import type {
   MembershipTierId,
   MembershipBillingCycle,
   PaidMembershipTierId,
-} from '@/types';
-import { DEMO_EMAIL, DEMO_PASSWORD } from '@/constants';
-import { mockCurrentUser } from '@/data/mock-users';
-import { mockNotifications } from '@/data/mock-notifications';
+} from '@/types/app.type';
+import { DEMO_EMAIL, DEMO_PASSWORD } from '@/constants/app.constants';
+import { mockCurrentUser } from '@/data/mock-users.mock';
+import { mockNotifications } from '@/data/mock-notifications.mock';
 
 // ─── MMKV Storage Adapter ──────────────────────────────────────────────────
 const mmkv = new MMKV();

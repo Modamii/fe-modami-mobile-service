@@ -1,4 +1,4 @@
-import type { User } from '@/types';
+import type { User } from '@/types/app.type';
 
 export const mockCurrentUser: User = {
   id: 'user-demo-001',

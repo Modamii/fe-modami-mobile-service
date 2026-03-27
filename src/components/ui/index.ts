@@ -1,4 +1,4 @@
-export { Button } from './Button';
-export { Input } from './Input';
-export { AppText } from './Text';
-export { Card } from './Card';
+export { Button } from './button.component';
+export { Input } from './input.component';
+export { AppText } from './text.component';
+export { Card } from './card.component';

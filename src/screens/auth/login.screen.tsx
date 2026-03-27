@@ -8,10 +8,10 @@ import {
   Platform,
   TouchableOpacity,
 } from 'react-native';
-import type { AuthStackScreenProps } from '@/navigation/types';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { useAuthStore } from '@/store';
+import type { AuthStackScreenProps } from '@/navigation/navigation.type';
+import { Button } from '@/components/ui/button.component';
+import { Input } from '@/components/ui/input.component';
+import { useAuthStore } from '@/store/app.store';
 import logo from '@/assets/logos/modami-logo-text.webp';
 
 type Props = AuthStackScreenProps<'Login'>;

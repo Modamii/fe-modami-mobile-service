@@ -1,6 +1,6 @@
 import React, { forwardRef, useState } from 'react';
 import { TextInput, View, Text, type TextInputProps } from 'react-native';
-import { COLORS } from '@/constants';
+import { COLORS } from '@/constants/app.constants';
 
 interface InputProps extends TextInputProps {
   label?: string;

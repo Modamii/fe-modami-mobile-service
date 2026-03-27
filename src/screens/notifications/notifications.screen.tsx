@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity } from 'react-native';
-import type { RootStackScreenProps } from '@/navigation/types';
-import { useNotificationStore } from '@/store';
-import { timeAgo } from '@/lib/utils';
+import type { RootStackScreenProps } from '@/navigation/navigation.type';
+import { useNotificationStore } from '@/store/app.store';
+import { timeAgo } from '@/lib/utils.helper';
 
 type Props = RootStackScreenProps<'Notifications'>;
 

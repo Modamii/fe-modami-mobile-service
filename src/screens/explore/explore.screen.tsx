@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Search, SlidersHorizontal, X } from 'lucide-react-native';
-import type { MainTabScreenProps } from '@/navigation/types';
-import { ProductCard } from '@/components/molecules/ProductCard';
-import { mockProducts } from '@/data/mock-products';
-import { CATEGORIES, COLORS } from '@/constants';
+import type { MainTabScreenProps } from '@/navigation/navigation.type';
+import { ProductCard } from '@/components/molecules/product-card.component';
+import { mockProducts } from '@/data/mock-products.mock';
+import { CATEGORIES, COLORS } from '@/constants/app.constants';
 
 type Props = MainTabScreenProps<'Explore'>;
 

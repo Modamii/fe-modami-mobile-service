@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import type { MainTabScreenProps } from '@/navigation/types';
-import { timeAgo } from '@/lib/utils';
-import type { Conversation } from '@/types';
+import type { MainTabScreenProps } from '@/navigation/navigation.type';
+import { timeAgo } from '@/lib/utils.helper';
+import type { Conversation } from '@/types/app.type';
 
 type Props = MainTabScreenProps<'Messages'>;
 

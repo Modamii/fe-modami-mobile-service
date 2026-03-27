@@ -20,9 +20,9 @@ import {
   Check,
   CheckCheck,
 } from 'lucide-react-native';
-import type { RootStackScreenProps } from '@/navigation/types';
-import { useAuthStore } from '@/store';
-import { COLORS } from '@/constants';
+import type { RootStackScreenProps } from '@/navigation/navigation.type';
+import { useAuthStore } from '@/store/app.store';
+import { COLORS } from '@/constants/app.constants';
 
 type Props = RootStackScreenProps<'Conversation'>;
 

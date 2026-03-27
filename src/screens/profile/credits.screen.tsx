@@ -2,10 +2,10 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Infinity, Zap, Crown, ShieldCheck, ArrowDownLeft, ArrowUpRight } from 'lucide-react-native';
-import type { RootStackScreenProps } from '@/navigation/types';
-import { useCreditStore } from '@/store';
-import { formatCredits } from '@/lib/utils';
-import { COLORS } from '@/constants';
+import type { RootStackScreenProps } from '@/navigation/navigation.type';
+import { useCreditStore } from '@/store/app.store';
+import { formatCredits } from '@/lib/utils.helper';
+import { COLORS } from '@/constants/app.constants';
 
 type Props = RootStackScreenProps<'Credits'>;
 

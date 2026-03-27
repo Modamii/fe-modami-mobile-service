@@ -25,9 +25,9 @@ import {
   IdCard,
   MapPin,
 } from 'lucide-react-native';
-import type { RootStackScreenProps } from '@/navigation/types';
-import { useAppStore } from '@/store';
-import { COLORS } from '@/constants';
+import type { RootStackScreenProps } from '@/navigation/navigation.type';
+import { useAppStore } from '@/store/app.store';
+import { COLORS } from '@/constants/app.constants';
 
 type Props = RootStackScreenProps<'Onboarding'>;
 

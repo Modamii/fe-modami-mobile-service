@@ -2,10 +2,10 @@ import React from 'react';
 import { View, Text, Image, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Bell, Crown, CreditCard, LogOut, ChevronRight } from 'lucide-react-native';
-import type { MainTabScreenProps } from '@/navigation/types';
-import { useAuthStore } from '@/store';
-import { CreditChip } from '@/components/molecules/CreditChip';
-import { COLORS, MEMBERSHIP_TIERS } from '@/constants';
+import type { MainTabScreenProps } from '@/navigation/navigation.type';
+import { useAuthStore } from '@/store/app.store';
+import { CreditChip } from '@/components/molecules/credit-chip.component';
+import { COLORS, MEMBERSHIP_TIERS } from '@/constants/app.constants';
 
 type Props = MainTabScreenProps<'Profile'>;
 

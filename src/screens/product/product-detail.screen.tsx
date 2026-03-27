@@ -25,11 +25,11 @@ import {
   Ruler,
   Clock,
 } from 'lucide-react-native';
-import type { RootStackScreenProps } from '@/navigation/types';
-import { useCreditStore, useProductStore } from '@/store';
-import { mockProducts } from '@/data/mock-products';
-import { formatPrice, formatCredits, timeAgo } from '@/lib/utils';
-import { COLORS } from '@/constants';
+import type { RootStackScreenProps } from '@/navigation/navigation.type';
+import { useCreditStore, useProductStore } from '@/store/app.store';
+import { mockProducts } from '@/data/mock-products.mock';
+import { formatPrice, formatCredits, timeAgo } from '@/lib/utils.helper';
+import { COLORS } from '@/constants/app.constants';
 
 type Props = RootStackScreenProps<'ProductDetail'>;
 

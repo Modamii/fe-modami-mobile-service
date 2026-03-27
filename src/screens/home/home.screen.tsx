@@ -2,12 +2,12 @@ import React from 'react';
 import { View, Text, Image, ScrollView, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Bell } from 'lucide-react-native';
-import type { MainTabScreenProps } from '@/navigation/types';
-import { useAuthStore, useNotificationStore } from '@/store';
-import { CreditChip } from '@/components/molecules/CreditChip';
-import { ProductCard } from '@/components/molecules/ProductCard';
-import { mockProducts } from '@/data/mock-products';
-import { COLORS } from '@/constants';
+import type { MainTabScreenProps } from '@/navigation/navigation.type';
+import { useAuthStore, useNotificationStore } from '@/store/app.store';
+import { CreditChip } from '@/components/molecules/credit-chip.component';
+import { ProductCard } from '@/components/molecules/product-card.component';
+import { mockProducts } from '@/data/mock-products.mock';
+import { COLORS } from '@/constants/app.constants';
 import logoLight from '@/assets/logos/modami-logo-text.webp';
 import logoDark from '@/assets/logos/logo-text-dark.webp';
 

@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { Lock } from 'lucide-react-native';
-import type { Product } from '@/types';
-import { formatPrice } from '@/lib/utils';
-import { COLORS } from '@/constants';
+import type { Product } from '@/types/app.type';
+import { formatPrice } from '@/lib/utils.helper';
+import { COLORS } from '@/constants/app.constants';
 
 interface ProductCardProps {
   product: Product;

@@ -1,15 +1,15 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import type { MainTabParamList } from './types';
-import { HomeScreen } from '@/screens/home/HomeScreen';
-import { ExploreScreen } from '@/screens/explore/ExploreScreen';
-import { PostListingScreen } from '@/screens/post-listing/PostListingScreen';
-import { MessagesScreen } from '@/screens/messages/MessagesScreen';
-import { ProfileScreen } from '@/screens/profile/ProfileScreen';
-import { COLORS } from '@/constants';
-import { TabBarIcon } from '@/components/atoms/TabBarIcon';
-import { useNotificationStore } from '@/store';
+import type { MainTabParamList } from './navigation.type';
+import { HomeScreen } from '@/screens/home/home.screen';
+import { ExploreScreen } from '@/screens/explore/explore.screen';
+import { PostListingScreen } from '@/screens/post-listing/post-listing.screen';
+import { MessagesScreen } from '@/screens/messages/messages.screen';
+import { ProfileScreen } from '@/screens/profile/profile.screen';
+import { COLORS } from '@/constants/app.constants';
+import { TabBarIcon } from '@/components/atoms/tab-bar-icon.component';
+import { useNotificationStore } from '@/store/app.store';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 

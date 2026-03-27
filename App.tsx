@@ -4,8 +4,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'react-native';
-import { RootNavigator } from '@/navigation/RootNavigator';
-import { COLORS } from '@/constants';
+import { RootNavigator } from '@/navigation/root.navigator';
+import { COLORS } from '@/constants/app.constants';
 
 export default function App() {
   return (

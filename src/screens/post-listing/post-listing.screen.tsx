@@ -10,10 +10,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Camera, CheckCircle2 } from 'lucide-react-native';
-import type { MainTabScreenProps } from '@/navigation/types';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { CATEGORIES, CONDITIONS, COLORS } from '@/constants';
+import type { MainTabScreenProps } from '@/navigation/navigation.type';
+import { Button } from '@/components/ui/button.component';
+import { Input } from '@/components/ui/input.component';
+import { CATEGORIES, CONDITIONS, COLORS } from '@/constants/app.constants';
 
 type Props = MainTabScreenProps<'PostListing'>;
 

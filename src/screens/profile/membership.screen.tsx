@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { Check } from 'lucide-react-native';
-import type { RootStackScreenProps } from '@/navigation/types';
-import { useAuthStore, useMembershipStore } from '@/store';
-import { COLORS } from '@/constants';
-import type { PaidMembershipTierId, MembershipBillingCycle } from '@/types';
+import type { RootStackScreenProps } from '@/navigation/navigation.type';
+import { useAuthStore, useMembershipStore } from '@/store/app.store';
+import { COLORS } from '@/constants/app.constants';
+import type { PaidMembershipTierId, MembershipBillingCycle } from '@/types/app.type';
 
 type Props = RootStackScreenProps<'Membership'>;
 

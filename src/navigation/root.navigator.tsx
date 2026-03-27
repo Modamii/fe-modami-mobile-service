@@ -1,17 +1,17 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import type { RootStackParamList } from './types';
-import { AuthNavigator } from './AuthNavigator';
-import { MainTabNavigator } from './MainTabNavigator';
-import { useAuthStore, useAppStore } from '@/store';
-import { COLORS } from '@/constants';
+import type { RootStackParamList } from './navigation.type';
+import { AuthNavigator } from './auth.navigator';
+import { MainTabNavigator } from './main-tab.navigator';
+import { useAuthStore, useAppStore } from '@/store/app.store';
+import { COLORS } from '@/constants/app.constants';
 
-import { OnboardingScreen } from '@/screens/onboarding/OnboardingScreen';
-import { ProductDetailScreen } from '@/screens/product/ProductDetailScreen';
-import { ConversationScreen } from '@/screens/messages/ConversationScreen';
-import { NotificationsScreen } from '@/screens/notifications/NotificationsScreen';
-import { MembershipScreen } from '@/screens/profile/MembershipScreen';
-import { CreditsScreen } from '@/screens/profile/CreditsScreen';
+import { OnboardingScreen } from '@/screens/onboarding/onboarding.screen';
+import { ProductDetailScreen } from '@/screens/product/product-detail.screen';
+import { ConversationScreen } from '@/screens/messages/conversation.screen';
+import { NotificationsScreen } from '@/screens/notifications/notifications.screen';
+import { MembershipScreen } from '@/screens/profile/membership.screen';
+import { CreditsScreen } from '@/screens/profile/credits.screen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
