@@ -5,6 +5,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'react-native';
 import { RootNavigator } from '@/navigation/root.navigator';
+import { QueryProvider } from '@/providers/query.provider';
 import { COLORS } from '@/constants/app.constants';
 // TODO: re-enable when iOS Client ID is configured
 // import { configureGoogleSignIn } from '@/lib/google-auth';
@@ -14,10 +15,12 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
-        <NavigationContainer>
-          <RootNavigator />
-        </NavigationContainer>
+        <QueryProvider>
+          <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+          <NavigationContainer>
+            <RootNavigator />
+          </NavigationContainer>
+        </QueryProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
