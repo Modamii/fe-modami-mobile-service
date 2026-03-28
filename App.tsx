@@ -6,6 +6,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'react-native';
 import { RootNavigator } from '@/navigation/root.navigator';
 import { COLORS } from '@/constants/app.constants';
+// TODO: re-enable when iOS Client ID is configured
+// import { configureGoogleSignIn } from '@/lib/google-auth';
+// configureGoogleSignIn();
 
 export default function App() {
   return (

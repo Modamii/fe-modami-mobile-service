@@ -26,6 +26,10 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>ModaMi cần quyền truy cập camera để chụp ảnh sản phẩm.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>ModaMi cần quyền truy cập thư viện ảnh để chọn ảnh sản phẩm.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>

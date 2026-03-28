@@ -4,12 +4,21 @@ module.exports = {
     'nativewind/babel', // preset (not plugin) — transforms className prop via react-native-css-interop
   ],
   plugins: [
+    '@babel/plugin-transform-export-namespace-from',
     [
       'module-resolver',
       {
         root: ['./src'],
         alias: { '@': './src' },
         extensions: ['.ts', '.tsx', '.js', '.jsx'],
+      },
+    ],
+    [
+      'module:react-native-dotenv',
+      {
+        moduleName: '@env',
+        path: '.env',
+        safe: true,
       },
     ],
     // Must be last — reanimated Babel plugin rewrites worklets for the UI thread

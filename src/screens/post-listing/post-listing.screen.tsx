@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -6,91 +6,50 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
-  Alert,
-  useWindowDimensions,
 } from 'react-native';
+import { Controller } from 'react-hook-form';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CameraIcon } from 'react-native-heroicons/outline';
 import { CheckCircleIcon } from 'react-native-heroicons/solid';
 import type { MainTabScreenProps } from '@/navigation/navigation.type';
 import { Button } from '@/components/ui/button.component';
 import { Input } from '@/components/ui/input.component';
 import { CATEGORIES, CONDITIONS, COLORS } from '@/constants/app.constants';
+import { usePostListingScreen } from './hooks/usePostListingScreen';
+import { PhotoGrid } from './components/photo-grid.component';
+import { SectionTitle } from './components/section-title.component';
+import { ChipPicker } from './components/chip-picker.component';
 
 type Props = MainTabScreenProps<'PostListing'>;
 
 const CONDITION_LABELS: Record<string, string> = {
-  'new': 'Mới — chưa dùng, còn tag',
+  new: 'Mới — chưa dùng, còn tag',
   'like-new': 'Như mới — dùng 1-2 lần',
-  'good': 'Tốt — dùng vài lần, không lỗi',
-  'fair': 'Khá tốt — có dấu hiệu dùng nhỏ',
+  good: 'Tốt — dùng vài lần, không lỗi',
+  fair: 'Khá tốt — có dấu hiệu dùng nhỏ',
+};
+
+const CONDITION_NAMES: Record<string, string> = {
+  new: 'Mới',
+  'like-new': 'Như mới',
+  good: 'Tốt',
+  fair: 'Khá tốt',
 };
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'One Size', 'Khác'];
 
-const PHOTO_GRID_GAP = 12;
-const PHOTO_GRID_COLS = 3;
-
-function SectionTitle({ children }: Readonly<{ children: string }>) {
-  return <Text className="text-sm font-bold text-on-surface uppercase tracking-widest mb-3">{children}</Text>;
-}
-
-
-function ChipPicker({
-  options,
-  selected,
-  onSelect,
-  labelMap,
-}: Readonly<{
-  options: readonly string[];
-  selected: string | null;
-  onSelect: (v: string) => void;
-  labelMap?: Record<string, string>;
-}>) {
-  return (
-    <View className="flex-row flex-wrap gap-2">
-      {options.map((opt) => {
-        const isSelected = selected === opt;
-        return (
-          <TouchableOpacity
-            key={opt}
-            onPress={() => onSelect(opt)}
-            className={`rounded-full px-4 py-2 ${isSelected ? 'bg-primary' : 'bg-surface'}`}
-            style={isSelected ? undefined : { shadowColor: COLORS.onSurface, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1 }}
-          >
-            <Text className={`text-sm font-medium ${isSelected ? 'text-white' : 'text-secondary'}`}>
-              {labelMap ? labelMap[opt] ?? opt : opt}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-    </View>
-  );
-}
-
 export function PostListingScreen(_props: Props) {
-  const [photoGridRowWidth, setPhotoGridRowWidth] = useState(0);
-  const { width: windowWidth } = useWindowDimensions();
+  const {
+    form,
+    photos,
+    handleAddPhoto,
+    handleRemovePhoto,
+    handleReorderPhotos,
+    onSubmit,
+  } = usePostListingScreen();
 
-  const photoCellSize = useMemo(() => {
-    const available =
-      photoGridRowWidth > 0 ? photoGridRowWidth : Math.max(0, windowWidth - 40);
-    return (available - PHOTO_GRID_GAP * (PHOTO_GRID_COLS - 1)) / PHOTO_GRID_COLS;
-  }, [photoGridRowWidth, windowWidth]);
-
-  const [title, setTitle] = useState('');
-  const [price, setPrice] = useState('');
-  const [brand, setBrand] = useState('');
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState<string | null>(null);
-  const [size, setSize] = useState<string | null>(null);
-  const [condition, setCondition] = useState<string | null>(null);
-
-  const canSubmit = title.trim() && price.trim() && category && condition;
-
-  const handleSubmit = () => {
-    Alert.alert('Đã đăng bán!', 'Sản phẩm của bạn đang chờ kiểm duyệt.', [{ text: 'OK' }]);
-  };
+  const { control, formState: { errors } } = form;
+  const scrollRef = useRef<ScrollView>(null);
+  const [scrollEnabled, setScrollEnabled] = useState(true);
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -99,163 +58,203 @@ export function PostListingScreen(_props: Props) {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView
+          ref={scrollRef}
           className="flex-1"
+          scrollEnabled={scrollEnabled}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
           {/* Header */}
           <View className="px-5 pt-4 pb-2">
-            <Text className="text-2xl font-black text-on-surface tracking-tight">Đăng bán</Text>
-            <Text className="text-sm text-secondary mt-0.5">Chia sẻ món đồ của bạn với cộng đồng</Text>
+            <Text className="text-2xl font-black text-on-surface tracking-tight">
+              Đăng bán
+            </Text>
+            <Text className="text-sm text-secondary mt-0.5">
+              Chia sẻ món đồ của bạn với cộng đồng
+            </Text>
           </View>
 
-          {/* ── Photos ── */}
+          {/* Photos */}
           <View className="px-5 pt-4 pb-2">
             <SectionTitle>Ảnh sản phẩm</SectionTitle>
-            <View
-              className="flex-row flex-wrap w-full"
-              style={{ gap: PHOTO_GRID_GAP }}
-              onLayout={(e) => setPhotoGridRowWidth(e.nativeEvent.layout.width)}
-            >
-              {/* Main upload slot */}
-              <TouchableOpacity
-                className="bg-surface rounded-2xl items-center justify-center gap-2"
-                style={{
-                  width: photoCellSize,
-                  height: photoCellSize,
-                  shadowColor: COLORS.onSurface,
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.05,
-                  shadowRadius: 8,
-                  elevation: 1,
-                  borderWidth: 1.5,
-                  borderColor: COLORS.outlineVariant,
-                  borderStyle: 'dashed',
-                }}
-              >
-                <CameraIcon size={24} color={COLORS.secondary} />
-                <Text className="text-xs text-secondary font-medium">Thêm ảnh</Text>
-              </TouchableOpacity>
-
-              {/* Empty slots */}
-              {Array.from({ length: 5 }).map((_, i) => (
-                <View
-                  key={i}
-                  className="bg-surface-low rounded-2xl items-center justify-center"
-                  style={{
-                    width: photoCellSize,
-                    height: photoCellSize,
-                    borderWidth: 1,
-                    borderColor: COLORS.outlineVariant,
-                    borderStyle: 'dashed',
-                  }}
-                >
-                  <Text className="text-[11px] text-secondary/50">{i + 2}/6</Text>
-                </View>
-              ))}
-            </View>
-            <Text className="text-xs text-secondary mt-2">Ảnh đầu tiên là ảnh bìa · Tối đa 6 ảnh</Text>
+            <PhotoGrid
+              photos={photos}
+              onAdd={handleAddPhoto}
+              onRemove={handleRemovePhoto}
+              onReorder={handleReorderPhotos}
+              onDragStart={() => setScrollEnabled(false)}
+              onDragEnd={() => setScrollEnabled(true)}
+            />
           </View>
 
-          {/* ── Basic info ── */}
+          {/* Basic info */}
           <View className="px-5 pt-4 gap-3">
             <SectionTitle>Thông tin cơ bản</SectionTitle>
-            <Input
-              label="Tên sản phẩm *"
-              value={title}
-              onChangeText={setTitle}
-              placeholder="VD: Áo blazer vintage xanh navy"
+
+            <Controller
+              control={control}
+              name="title"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  label="Tên sản phẩm *"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  placeholder="VD: Áo blazer vintage xanh navy"
+                  error={errors.title?.message}
+                />
+              )}
             />
+
             <View className="flex-row gap-3">
               <View className="flex-1">
-                <Input
-                  label="Giá bán (₫) *"
-                  value={price}
-                  onChangeText={setPrice}
-                  placeholder="350.000"
-                  keyboardType="numeric"
+                <Controller
+                  control={control}
+                  name="price"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <Input
+                      label="Giá bán (₫) *"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      placeholder="350.000"
+                      keyboardType="numeric"
+                      error={errors.price?.message}
+                    />
+                  )}
                 />
               </View>
               <View className="flex-1">
-                <Input
-                  label="Thương hiệu"
-                  value={brand}
-                  onChangeText={setBrand}
-                  placeholder="Zara, H&M..."
+                <Controller
+                  control={control}
+                  name="brand"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <Input
+                      label="Thương hiệu"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      placeholder="Zara, H&M..."
+                    />
+                  )}
                 />
               </View>
             </View>
           </View>
 
-          {/* ── Category ── */}
+          {/* Category */}
           <View className="px-5 pt-4">
             <SectionTitle>Danh mục *</SectionTitle>
-            <ChipPicker
-              options={CATEGORIES}
-              selected={category}
-              onSelect={setCategory}
+            <Controller
+              control={control}
+              name="category"
+              render={({ field: { onChange, value } }) => (
+                <View className="gap-1.5">
+                  <ChipPicker
+                    options={CATEGORIES}
+                    selected={value || null}
+                    onSelect={onChange}
+                  />
+                  {errors.category && (
+                    <Text className="text-xs text-red-500">{errors.category.message}</Text>
+                  )}
+                </View>
+              )}
             />
           </View>
 
-          {/* ── Condition ── */}
+          {/* Condition */}
           <View className="px-5 pt-4">
             <SectionTitle>Tình trạng *</SectionTitle>
-            <View className="gap-2">
-              {CONDITIONS.map((cond) => {
-                const isSelected = condition === cond;
-                return (
-                  <TouchableOpacity
-                    key={cond}
-                    onPress={() => setCondition(cond)}
-                    className={`flex-row items-center gap-3 rounded-xl px-4 py-3 ${isSelected ? 'bg-primary/10' : 'bg-surface'}`}
-                    style={isSelected ? undefined : { shadowColor: COLORS.onSurface, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1 }}
-                  >
-                    <CheckCircleIcon
-                      size={20}
-                      color={isSelected ? COLORS.primary : COLORS.outlineVariant}
-                    />
-                    <View className="flex-1">
-                      <Text className={`text-sm font-semibold ${isSelected ? 'text-primary' : 'text-on-surface'}`}>
-                        {cond === 'new' ? 'Mới' : cond === 'like-new' ? 'Như mới' : cond === 'good' ? 'Tốt' : 'Khá tốt'}
-                      </Text>
-                      <Text className="text-xs text-secondary mt-0.5">{CONDITION_LABELS[cond]}</Text>
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
+            <Controller
+              control={control}
+              name="condition"
+              render={({ field: { onChange, value } }) => (
+                <View className="gap-2">
+                  {CONDITIONS.map((cond) => {
+                    const isSelected = value === cond;
+                    return (
+                      <TouchableOpacity
+                        key={cond}
+                        onPress={() => onChange(cond)}
+                        className={`flex-row items-center gap-3 rounded-xl px-4 py-3 ${isSelected ? 'bg-primary/10' : 'bg-surface'}`}
+                        style={
+                          isSelected
+                            ? undefined
+                            : {
+                                shadowColor: COLORS.onSurface,
+                                shadowOffset: { width: 0, height: 1 },
+                                shadowOpacity: 0.04,
+                                shadowRadius: 4,
+                                elevation: 1,
+                              }
+                        }
+                      >
+                        <CheckCircleIcon
+                          size={20}
+                          color={isSelected ? COLORS.primary : COLORS.outlineVariant}
+                        />
+                        <View className="flex-1">
+                          <Text
+                            className={`text-sm font-semibold ${isSelected ? 'text-primary' : 'text-on-surface'}`}
+                          >
+                            {CONDITION_NAMES[cond] ?? cond}
+                          </Text>
+                          <Text className="text-xs text-secondary mt-0.5">
+                            {CONDITION_LABELS[cond]}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
+                  {errors.condition && (
+                    <Text className="text-xs text-red-500">{errors.condition.message}</Text>
+                  )}
+                </View>
+              )}
+            />
           </View>
 
-          {/* ── Size ── */}
+          {/* Size */}
           <View className="px-5 pt-4">
             <SectionTitle>Kích cỡ</SectionTitle>
-            <ChipPicker options={SIZES} selected={size} onSelect={setSize} />
+            <Controller
+              control={control}
+              name="size"
+              render={({ field: { onChange, value } }) => (
+                <ChipPicker
+                  options={SIZES}
+                  selected={value || null}
+                  onSelect={onChange}
+                />
+              )}
+            />
           </View>
 
-          {/* ── Description ── */}
+          {/* Description */}
           <View className="px-5 pt-4 pb-4">
             <SectionTitle>Mô tả thêm</SectionTitle>
-            <Input
-              label=""
-              value={description}
-              onChangeText={setDescription}
-              placeholder="Mô tả chi tiết: xuất xứ, lý do bán, ghi chú kích thước thực tế..."
-              multiline
-              numberOfLines={4}
-              style={{ height: 100, textAlignVertical: 'top' }}
+            <Controller
+              control={control}
+              name="description"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  label=""
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  placeholder="Mô tả chi tiết: xuất xứ, lý do bán, ghi chú kích thước thực tế..."
+                  multiline
+                  numberOfLines={4}
+                  style={{ height: 100, textAlignVertical: 'top' }}
+                />
+              )}
             />
           </View>
 
           {/* Submit */}
           <View className="px-5 pb-8">
-            <Button onPress={handleSubmit} disabled={!canSubmit}>
-              Đăng bán ngay
-            </Button>
-            {!canSubmit && (
-              <Text className="text-xs text-secondary text-center mt-2">
-                Vui lòng điền tên, giá, danh mục và tình trạng
-              </Text>
-            )}
+            <Button onPress={onSubmit}>Đăng bán ngay</Button>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

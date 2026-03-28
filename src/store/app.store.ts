@@ -12,6 +12,8 @@ import type {
 import { DEMO_EMAIL, DEMO_PASSWORD } from '@/constants/app.constants';
 import { mockCurrentUser } from '@/data/mock-users.mock';
 import { mockNotifications } from '@/data/mock-notifications.mock';
+// TODO: re-enable when iOS Client ID is configured
+// import { signInWithGoogle, signOutGoogle, statusCodes } from '@/lib/google-auth';
 
 // ─── MMKV Storage Adapter ──────────────────────────────────────────────────
 const mmkv = new MMKV();
