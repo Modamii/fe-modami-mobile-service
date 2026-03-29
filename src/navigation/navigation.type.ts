@@ -20,7 +20,6 @@ export type MainTabParamList = {
 // ─── Root Stack ────────────────────────────────────────────────────────────
 export type RootStackParamList = {
   Onboarding: undefined;
-  Auth: undefined;
   Main: { screen?: keyof MainTabParamList } | undefined;
   ProductDetail: { productId: string };
   SellerDetail: { sellerId: string };
@@ -32,6 +31,13 @@ export type RootStackParamList = {
   Credits: undefined;
   Dashboard: undefined;
   EditProfile: undefined;
+  Saved: undefined;
+  MyListings: undefined;
+  ListingDetail: { listingId: string };
+  // ── Auth (modal presentations) ──────────────────────────────────────────
+  Login: undefined;
+  Register: undefined;
+  AuthPrompt: { message?: string } | undefined;
 };
 
 // ─── Typed props helpers ────────────────────────────────────────────────────
