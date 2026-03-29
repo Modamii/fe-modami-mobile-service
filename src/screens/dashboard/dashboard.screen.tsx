@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Platform,
   Alert,
+  RefreshControl,
 } from 'react-native';
 import { StarIcon, PencilSquareIcon } from 'react-native-heroicons/solid';
 import { ChevronRightIcon } from 'react-native-heroicons/outline';
@@ -14,12 +15,8 @@ import type { RootStackScreenProps } from '@/navigation/navigation.type';
 import { useAuthStore, useCreditStore } from '@/store/app.store';
 import { COLORS } from '@/constants/app.constants';
 import { formatCredits, formatPrice } from '@/lib/utils.helper';
-import {
-  MOCK_DASHBOARD_LISTINGS,
-  MOCK_DASHBOARD_FEATURED,
-  MOCK_DASHBOARD_CONTACTS,
-  MOCK_DASHBOARD_CREDIT_HISTORY,
-} from '@/data/mock-dashboard.mock';
+import { useDashboard } from '@/hooks/queries/dashboard.queries';
+import { DashboardSkeleton } from './dashboard-skeleton.component';
 
 type Props = RootStackScreenProps<'Dashboard'>;
 
@@ -37,9 +34,18 @@ export function DashboardScreen({ navigation }: Props) {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const balance = useCreditStore((s) => s.balance);
+  const { data, isLoading, isRefetching, refetch } = useDashboard();
+
+  const onRefresh = useCallback(async () => { await refetch(); }, [refetch]);
 
   if (!user) return null;
 
+  if (isLoading) return <DashboardSkeleton />;
+
+  const listings = data?.data.listings ?? [];
+  const featured = data?.data.featured ?? [];
+  const contacts = data?.data.contacts ?? [];
+  const creditHistory = data?.data.creditHistory ?? [];
   const sellerRating = 4.8;
 
   return (
@@ -48,6 +54,14 @@ export function DashboardScreen({ navigation }: Props) {
         className="flex-1"
         showsVerticalScrollIndicator={false}
         contentContainerClassName="px-5 pb-10 pt-2"
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={onRefresh}
+            tintColor={COLORS.primary}
+            colors={[COLORS.primary]}
+          />
+        }
       >
         <Text className="text-xs font-semibold text-secondary uppercase tracking-widest mb-4">
           Tổng quan cửa hàng
@@ -98,11 +112,11 @@ export function DashboardScreen({ navigation }: Props) {
             Tin đăng của tôi
           </Text>
           <View className="bg-surface rounded-3xl overflow-hidden" style={cardShadow}>
-            {MOCK_DASHBOARD_LISTINGS.map((row, index) => (
+            {listings.map((row, index) => (
               <View
                 key={row.id}
                 className={`flex-row items-center gap-3 px-4 py-3 ${
-                  index < MOCK_DASHBOARD_LISTINGS.length - 1 ? 'border-b border-surface-container' : ''
+                  index < listings.length - 1 ? 'border-b border-surface-container' : ''
                 }`}
               >
                 <Image
@@ -157,7 +171,7 @@ export function DashboardScreen({ navigation }: Props) {
             Tin đăng nổi bật
           </Text>
           <View className="bg-surface rounded-3xl p-4 gap-3" style={cardShadow}>
-            {MOCK_DASHBOARD_FEATURED.map((f) => (
+            {featured.map((f) => (
               <View
                 key={f.id}
                 className="flex-row items-center justify-between gap-2 py-1 border-b border-surface-container last:border-0"
@@ -189,7 +203,7 @@ export function DashboardScreen({ navigation }: Props) {
             Liên hệ & giao dịch mới
           </Text>
           <View className="bg-surface rounded-3xl overflow-hidden" style={cardShadow}>
-            {MOCK_DASHBOARD_CONTACTS.map((c, i) => (
+            {contacts.map((c, i) => (
               <TouchableOpacity
                 key={c.id}
                 onPress={() =>
@@ -199,7 +213,7 @@ export function DashboardScreen({ navigation }: Props) {
                   })
                 }
                 className={`flex-row items-center gap-3 px-4 py-3 ${
-                  i < MOCK_DASHBOARD_CONTACTS.length - 1 ? 'border-b border-surface-container' : ''
+                  i < contacts.length - 1 ? 'border-b border-surface-container' : ''
                 }`}
                 activeOpacity={0.75}
               >
@@ -229,7 +243,7 @@ export function DashboardScreen({ navigation }: Props) {
             Lịch sử nạp Credit
           </Text>
           <View className="bg-surface rounded-3xl p-4" style={cardShadow}>
-            {MOCK_DASHBOARD_CREDIT_HISTORY.map((h) => (
+            {creditHistory.map((h) => (
               <View key={h.id} className="flex-row items-center justify-between">
                 <View>
                   <Text className="text-sm font-semibold text-on-surface">{h.label}</Text>
