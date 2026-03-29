@@ -1,15 +1,27 @@
-import React, { useMemo, useState } from 'react';
-import { Image, ScrollView, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
+import React, { useMemo, useState, useCallback } from 'react';
+import {
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
+  RefreshControl,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { MainTabScreenProps } from '@/navigation/navigation.type';
 import { ProductCard } from '@/components/molecules/product-card.component';
-import { mockProducts } from '@/data/mock-products.mock';
 import { useHomeScreen } from './hooks/useHomeScreen';
 import { HomeHeader } from './components/home-header.component';
 import { NewArrivalsSection } from './components/new-arrivals-section.component';
 import { CategorySection } from './components/category-section.component';
 import { NearbySection } from './components/nearby-section.component';
 import { TrendsSection } from './components/trends-section.component';
+import { HomeScreenSkeleton } from './components/home-skeleton.component';
+import { useQueryClient } from '@tanstack/react-query';
+import { productKeys } from '@/hooks/queries/product.queries';
+import type { Product } from '@/types/app.type';
+import { COLORS } from '@/constants/app.constants';
 import logoDark from '@/assets/logos/logo-text-dark.webp';
 
 type Props = MainTabScreenProps<'Home'>;
@@ -18,10 +30,15 @@ const HOME_GRID_GAP = 12;
 const HOME_GRID_COLS = 2;
 
 export function HomeScreen({ navigation }: Props) {
+  const queryClient = useQueryClient();
   const [trendGridRowWidth, setTrendGridRowWidth] = useState(0);
+
+  const navigateToProduct = useCallback((product: Product) => {
+    queryClient.setQueryData(productKeys.detail(product.id), { data: product });
+    navigation.navigate('ProductDetail', { productId: product.id });
+  }, [queryClient, navigation]);
   const { width: windowWidth } = useWindowDimensions();
 
-  /** Chiều rộng thực của hàng grid (sau px-5) — tránh lệch do windowWidth ≠ vùng ScrollView / làm tròn */
   const homeGridColumnWidth = useMemo(() => {
     const available =
       trendGridRowWidth > 0
@@ -30,7 +47,20 @@ export function HomeScreen({ navigation }: Props) {
     return (available - HOME_GRID_GAP * (HOME_GRID_COLS - 1)) / HOME_GRID_COLS;
   }, [trendGridRowWidth, windowWidth]);
 
-  const { user, unreadCount, newArrivals, categories, nearbyProducts, trends } = useHomeScreen();
+  const {
+    user,
+    unreadCount,
+    newArrivals,
+    allProducts,
+    categories,
+    nearbyProducts,
+    trends,
+    isLoading,
+    isRefreshing,
+    onRefresh,
+  } = useHomeScreen();
+
+  if (isLoading) return <HomeScreenSkeleton />;
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -38,6 +68,14 @@ export function HomeScreen({ navigation }: Props) {
         className="flex-1"
         showsVerticalScrollIndicator={false}
         contentContainerClassName="pb-8"
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={onRefresh}
+            tintColor={COLORS.primary}
+            colors={[COLORS.primary]}
+          />
+        }
       >
         <HomeHeader
           unreadCount={unreadCount}
@@ -54,7 +92,7 @@ export function HomeScreen({ navigation }: Props) {
             resizeMode="contain"
           />
           <Text className="text-white/90 text-[18px] font-bold my-1">
-            Thời trang bền vững{'\n'}từ cộng đồng Curator
+            {`Thời trang bền vững\ntừ cộng đồng Curator`}
           </Text>
           <Text className="text-white/75 text-[13px] font-medium mt-1">
             Khám phá hàng nghìn món đồ được tuyển chọn
@@ -72,7 +110,7 @@ export function HomeScreen({ navigation }: Props) {
         <NewArrivalsSection
           data={newArrivals}
           onSeeAll={() => navigation.navigate('Explore')}
-          onItemPress={(id) => navigation.navigate('ProductDetail', { productId: id })}
+          onItemPress={navigateToProduct}
         />
 
         <CategorySection
@@ -97,16 +135,14 @@ export function HomeScreen({ navigation }: Props) {
           </Text>
           <View
             className="flex-row flex-wrap w-full"
-            style={{ gap: HOME_GRID_GAP }}
+            style={{ gap: HOME_GRID_GAP, alignItems: 'stretch' }}
             onLayout={(e) => setTrendGridRowWidth(e.nativeEvent.layout.width)}
           >
-            {mockProducts.map((product) => (
+            {allProducts.map((product) => (
               <View key={product.id} style={{ width: homeGridColumnWidth }}>
                 <ProductCard
                   product={product}
-                  onPress={(selectedProduct) => {
-                    navigation.navigate('ProductDetail', { productId: selectedProduct.id });
-                  }}
+                  onPress={navigateToProduct}
                 />
               </View>
             ))}

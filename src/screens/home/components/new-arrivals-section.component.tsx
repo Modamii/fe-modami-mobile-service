@@ -10,7 +10,7 @@ const SNAP_INTERVAL = CARD_WIDTH + CARD_GAP;
 interface NewArrivalsSectionProps {
   data: Product[];
   onSeeAll: () => void;
-  onItemPress: (id: string) => void;
+  onItemPress: (product: Product) => void;
 }
 
 export function NewArrivalsSection({ data, onSeeAll, onItemPress }: NewArrivalsSectionProps) {
@@ -37,7 +37,7 @@ export function NewArrivalsSection({ data, onSeeAll, onItemPress }: NewArrivalsS
         decelerationRate="fast"
         snapToAlignment="start"
         renderItem={({ item }) => (
-          <NewArrivalsCard item={item} onPress={() => onItemPress(item.id)} />
+          <NewArrivalsCard item={item} onPress={() => onItemPress(item)} />
         )}
       />
     </View>
