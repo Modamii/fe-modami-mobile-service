@@ -1,11 +1,13 @@
-import React, { useMemo, useRef, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, useWindowDimensions } from 'react-native';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
+import Svg, { Rect } from 'react-native-svg';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
   runOnJS,
+  type SharedValue,
 } from 'react-native-reanimated';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { CameraIcon, XMarkIcon } from 'react-native-heroicons/outline';
@@ -18,7 +20,6 @@ const GRID_GAP = 10;
 const HORIZONTAL_PADDING = 40; // px-5 * 2
 
 // ─── PhotoCell ────────────────────────────────────────────────────────────────
-// Tách thành component riêng để gesture object ổn định, không tạo lại mỗi render
 
 type PhotoCellProps = {
   photo: PhotoItem;
@@ -28,9 +29,9 @@ type PhotoCellProps = {
   isDragSource: boolean;
   isDropTarget: boolean;
   onRemove: (id: string) => void;
-  ghostX: Animated.SharedValue<number>;
-  ghostY: Animated.SharedValue<number>;
-  isDraggingShared: Animated.SharedValue<boolean>;
+  ghostX: SharedValue<number>;
+  ghostY: SharedValue<number>;
+  isDraggingShared: SharedValue<boolean>;
   onLongPressStart: (index: number, absX: number, absY: number) => void;
   onPanUpdate: (absX: number, absY: number) => void;
   onPanEnd: (absX: number, absY: number) => void;
@@ -51,6 +52,30 @@ function PhotoCell({
   onPanUpdate,
   onPanEnd,
 }: PhotoCellProps) {
+  // Refs giữ callback mới nhất — gesture (memo []) không bị stale closure
+  const onLongPressStartRef = useRef(onLongPressStart);
+  onLongPressStartRef.current = onLongPressStart;
+  const onPanUpdateRef = useRef(onPanUpdate);
+  onPanUpdateRef.current = onPanUpdate;
+  const onPanEndRef = useRef(onPanEnd);
+  onPanEndRef.current = onPanEnd;
+  const indexRef = useRef(index);
+  indexRef.current = index;
+
+  // Stable wrappers — identity không đổi, delegate đến ref.current
+  const stableLongPressStart = useCallback(
+    (idx: number, ax: number, ay: number) => onLongPressStartRef.current(idx, ax, ay),
+    [],
+  );
+  const stablePanUpdate = useCallback(
+    (ax: number, ay: number) => onPanUpdateRef.current(ax, ay),
+    [],
+  );
+  const stablePanEnd = useCallback(
+    (ax: number, ay: number) => onPanEndRef.current(ax, ay),
+    [],
+  );
+
   const longPress = useMemo(
     () =>
       Gesture.LongPress()
@@ -60,11 +85,10 @@ function PhotoCell({
           ghostX.value = e.absoluteX;
           ghostY.value = e.absoluteY;
           isDraggingShared.value = true;
-          runOnJS(onLongPressStart)(index, e.absoluteX, e.absoluteY);
+          runOnJS(stableLongPressStart)(indexRef.current, e.absoluteX, e.absoluteY);
         }),
-    // index không đổi trong vòng đời của cell này
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [index],
+    [],
   );
 
   const pan = useMemo(
@@ -75,12 +99,12 @@ function PhotoCell({
           'worklet';
           ghostX.value = e.absoluteX;
           ghostY.value = e.absoluteY;
-          runOnJS(onPanUpdate)(e.absoluteX, e.absoluteY);
+          runOnJS(stablePanUpdate)(e.absoluteX, e.absoluteY);
         })
         .onEnd((e) => {
           'worklet';
           isDraggingShared.value = false;
-          runOnJS(onPanEnd)(e.absoluteX, e.absoluteY);
+          runOnJS(stablePanEnd)(e.absoluteX, e.absoluteY);
         })
         .onFinalize(() => {
           'worklet';
@@ -90,63 +114,62 @@ function PhotoCell({
     [],
   );
 
-  const gesture = useMemo(
-    () => Gesture.Simultaneous(longPress, pan),
-    [longPress, pan],
-  );
+  const gesture = useMemo(() => Gesture.Simultaneous(longPress, pan), [longPress, pan]);
 
   return (
     <GestureDetector gesture={gesture}>
+      {/* Outer: border ring (overflow visible để border không bị clip) */}
       <View
-        style={{
-          width: cellSize,
-          height: cellSize,
-          margin: GRID_GAP / 2,
-          borderRadius: 12,
-          overflow: 'hidden',
-          opacity: isDragSource ? 0.25 : 1,
-          borderWidth: isDropTarget ? 2.5 : 0,
-          borderColor: isDropTarget ? COLORS.primary : 'transparent',
-        }}
+        style={[
+          styles.cellOuter,
+          { width: cellSize, height: cellSize },
+          isDragSource && styles.cellDragging,
+          isDropTarget && styles.cellDropTarget,
+        ]}
       >
-        <Image
-          source={{ uri: photo.uri }}
-          style={{ width: '100%', height: '100%' }}
-          resizeMode="cover"
-        />
-        {isCover && !isDragSource && (
-          <View
-            style={{
-              position: 'absolute',
-              bottom: 6,
-              left: 6,
-              backgroundColor: 'rgba(39,79,56,0.82)',
-              borderRadius: 6,
-              paddingHorizontal: 6,
-              paddingVertical: 2,
-            }}
+        {/* Inner: clip ảnh theo bo góc */}
+        <View style={styles.cellInner}>
+          <Image source={{ uri: photo.uri }} style={styles.cellImage} resizeMode="cover" />
+          {isCover && !isDragSource && (
+            <View style={styles.coverBadge}>
+              <Text style={styles.coverText}>Bìa</Text>
+            </View>
+          )}
+          <TouchableOpacity
+            onPress={() => onRemove(photo.id)}
+            style={styles.removeBtn}
+            hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
           >
-            <Text style={{ color: 'white', fontSize: 10, fontWeight: '600' }}>
-              Ảnh bìa
-            </Text>
-          </View>
-        )}
-        <TouchableOpacity
-          onPress={() => onRemove(photo.id)}
-          style={{
-            position: 'absolute',
-            top: 4,
-            right: 4,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            borderRadius: 99,
-            padding: 2,
-          }}
-          hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
-        >
-          <XMarkIcon size={14} color="white" />
-        </TouchableOpacity>
+            <XMarkIcon size={14} color="white" />
+          </TouchableOpacity>
+        </View>
       </View>
     </GestureDetector>
+  );
+}
+
+// ─── DashedEmptyCell ──────────────────────────────────────────────────────────
+
+function DashedEmptyCell({ size, slotNumber }: { size: number; slotNumber: number }) {
+  const r = 12;
+  return (
+    <View style={[styles.dashedCell, { width: size, height: size }]}>
+      <Svg style={StyleSheet.absoluteFillObject} width={size} height={size}>
+        <Rect
+          x={1}
+          y={1}
+          width={size - 2}
+          height={size - 2}
+          rx={r}
+          ry={r}
+          fill={COLORS.surfaceContainer}
+          stroke={COLORS.outlineVariant}
+          strokeWidth={1.5}
+          strokeDasharray="5,4"
+        />
+      </Svg>
+      <Text style={styles.slotLabel}>{slotNumber}/{MAX_PHOTOS}</Text>
+    </View>
   );
 }
 
@@ -174,16 +197,15 @@ export function PhotoGrid({
     (windowWidth - HORIZONTAL_PADDING - GRID_GAP * (GRID_COLS - 1)) / GRID_COLS;
 
   const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const dragIndexRef = useRef<number | null>(null);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
-  // Shared values — readable từ worklet (UI thread)
   const ghostX = useSharedValue(0);
   const ghostY = useSharedValue(0);
   const gridOriginX = useSharedValue(0);
   const gridOriginY = useSharedValue(0);
   const isDraggingShared = useSharedValue(false);
 
-  // Ref cho JS-side calculations (getHoveredIndex)
   const gridOriginRef = useRef({ x: 0, y: 0 });
   const gridRef = useRef<View>(null);
 
@@ -206,8 +228,9 @@ export function PhotoGrid({
     return idx < photos.length ? idx : null;
   }
 
-  function handleLongPressStart(index: number, absX: number, absY: number) {
-    measureGrid(); // refresh — user có thể đã scroll
+  function handleLongPressStart(index: number, _absX: number, _absY: number) {
+    measureGrid();
+    dragIndexRef.current = index;
     setDragIndex(index);
     setHoverIndex(index);
     onDragStart();
@@ -222,7 +245,7 @@ export function PhotoGrid({
   }
 
   function handlePanEnd(absX: number, absY: number) {
-    const from = dragIndex;
+    const from = dragIndexRef.current;
     const to = getHoveredIndex(absX, absY);
 
     if (from !== null && to !== null && from !== to) {
@@ -236,12 +259,12 @@ export function PhotoGrid({
       });
     }
 
+    dragIndexRef.current = null;
     setDragIndex(null);
     setHoverIndex(null);
     onDragEnd();
   }
 
-  // Ghost theo ngón tay, nổi lên trên toàn bộ grid
   const ghostStyle = useAnimatedStyle(() => ({
     position: 'absolute',
     width: cellSize,
@@ -262,14 +285,8 @@ export function PhotoGrid({
   }));
 
   return (
-    <View ref={gridRef} onLayout={measureGrid} style={{ position: 'relative' }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          flexWrap: 'wrap',
-          marginHorizontal: -(GRID_GAP / 2),
-        }}
-      >
+    <View ref={gridRef} onLayout={measureGrid} style={styles.container}>
+      <View style={styles.grid}>
         {photos.map((photo, index) => (
           <PhotoCell
             key={photo.id}
@@ -278,11 +295,7 @@ export function PhotoGrid({
             cellSize={cellSize}
             isCover={index === 0}
             isDragSource={dragIndex === index}
-            isDropTarget={
-              hoverIndex === index &&
-              dragIndex !== null &&
-              dragIndex !== index
-            }
+            isDropTarget={hoverIndex === index && dragIndex !== null && dragIndex !== index}
             onRemove={onRemove}
             ghostX={ghostX}
             ghostY={ghostY}
@@ -293,70 +306,132 @@ export function PhotoGrid({
           />
         ))}
 
-        {/* Nút thêm ảnh */}
         {photos.length < MAX_PHOTOS && (
           <TouchableOpacity
             onPress={onAdd}
-            style={{
-              width: cellSize,
-              height: cellSize,
-              margin: GRID_GAP / 2,
-              borderRadius: 12,
-              borderWidth: 1.5,
-              borderColor: COLORS.outlineVariant,
-              borderStyle: 'dashed',
-              backgroundColor: COLORS.surface,
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 6,
-              shadowColor: COLORS.onSurface,
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.05,
-              shadowRadius: 8,
-              elevation: 1,
-            }}
+            activeOpacity={0.7}
+            style={[styles.dashedCell, { width: cellSize, height: cellSize }]}
           >
+            <Svg style={StyleSheet.absoluteFillObject} width={cellSize} height={cellSize}>
+              <Rect
+                x={1}
+                y={1}
+                width={cellSize - 2}
+                height={cellSize - 2}
+                rx={12}
+                ry={12}
+                fill={COLORS.surface}
+                stroke={COLORS.outlineVariant}
+                strokeWidth={1.5}
+                strokeDasharray="5,4"
+              />
+            </Svg>
             <CameraIcon size={22} color={COLORS.secondary} />
-            <Text style={{ fontSize: 11, color: COLORS.secondary, fontWeight: '500' }}>
-              Thêm ảnh
-            </Text>
+            <Text style={styles.addText}>Thêm ảnh</Text>
           </TouchableOpacity>
         )}
 
-        {/* Ô trống placeholder */}
-        {Array.from({ length: Math.max(0, MAX_PHOTOS - photos.length - 1) }).map(
-          (_, i) => (
-            <View
-              key={`empty-${i}`}
-              style={{
-                width: cellSize,
-                height: cellSize,
-                margin: GRID_GAP / 2,
-                borderRadius: 12,
-                borderWidth: 1,
-                borderColor: COLORS.outlineVariant,
-                borderStyle: 'dashed',
-                backgroundColor: COLORS.surfaceContainer,
-              }}
-            />
-          ),
-        )}
+        {Array.from({ length: Math.max(0, MAX_PHOTOS - photos.length - 1) }).map((_, i) => (
+          <DashedEmptyCell
+            key={`empty-${i}`}
+            size={cellSize}
+            slotNumber={photos.length + 2 + i}
+          />
+        ))}
       </View>
 
-      {/* Ghost — ảnh nổi theo ngón tay khi kéo */}
       {dragIndex !== null && photos[dragIndex] && (
         <Animated.View style={ghostStyle} pointerEvents="none">
-          <Image
-            source={{ uri: photos[dragIndex].uri }}
-            style={{ width: '100%', height: '100%', borderRadius: 12 }}
-            resizeMode="cover"
-          />
+          <Image source={{ uri: photos[dragIndex].uri }} style={styles.ghostImage} resizeMode="cover" />
         </Animated.View>
       )}
 
-      <Text style={{ fontSize: 12, color: COLORS.secondary, marginTop: 8 }}>
+      <Text style={styles.hint}>
         Giữ và kéo để sắp xếp · Ảnh đầu là ảnh bìa · Tối đa 6 ảnh
       </Text>
     </View>
   );
 }
+
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'relative',
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginHorizontal: -(GRID_GAP / 2),
+  },
+  // Outer: giữ border ring, không clip
+  cellOuter: {
+    borderRadius: 12,
+    margin: GRID_GAP / 2,
+  },
+  // Inner: clip ảnh theo bo góc
+  cellInner: {
+    flex: 1,
+    borderRadius: 10, // nhỏ hơn outer 2px để không tràn ra ngoài border
+    overflow: 'hidden',
+  },
+  cellDragging: {
+    opacity: 0.25,
+  },
+  cellDropTarget: {
+    borderWidth: 2.5,
+    borderColor: COLORS.primary,
+  },
+  cellImage: {
+    width: '100%',
+    height: '100%',
+  },
+  coverBadge: {
+    position: 'absolute',
+    bottom: 6,
+    left: 6,
+    backgroundColor: 'rgba(39,79,56,0.82)',
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  coverText: {
+    color: 'white',
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  removeBtn: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 99,
+    padding: 2,
+  },
+  addText: {
+    fontSize: 11,
+    color: COLORS.secondary,
+    fontWeight: '500',
+    marginTop: 6,
+  },
+  dashedCell: {
+    margin: GRID_GAP / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  slotLabel: {
+    fontSize: 12,
+    color: COLORS.secondary,
+    fontWeight: '500',
+  },
+  ghostImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 12,
+  },
+  hint: {
+    fontSize: 12,
+    color: COLORS.secondary,
+    marginTop: 8,
+  },
+});
