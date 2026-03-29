@@ -198,52 +198,54 @@ export function MyListingsScreen({ navigation }: Props) {
   return (
     <View style={{ flex: 1, backgroundColor: '#f9f9f8' }}>
       {/* Filter tabs */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingHorizontal: 20,
-          gap: 8,
-        }}
-        style={{ marginVertical: 14 }}
-      >
-        {TABS.map(tab => {
-          const count =
-            tab.value === 'all'
-              ? allListings.length
-              : allListings.filter(l => l.status === tab.value).length;
-          if (count === 0 && tab.value !== 'all') return null;
-          const active = activeTab === tab.value;
-          return (
-            <TouchableOpacity
-              key={tab.value}
-              onPress={() => setActiveTab(tab.value)}
-              style={{
-                paddingHorizontal: 16,
-                paddingVertical: 12,
-                borderRadius: 20,
-                backgroundColor: active ? COLORS.primary : '#edeeed',
-              }}
-            >
-              <Text
+      <View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingHorizontal: 20,
+            gap: 8,
+          }}
+          style={{ marginVertical: 14 }}
+        >
+          {TABS.map(tab => {
+            const count =
+              tab.value === 'all'
+                ? allListings.length
+                : allListings.filter(l => l.status === tab.value).length;
+            if (count === 0 && tab.value !== 'all') return null;
+            const active = activeTab === tab.value;
+            return (
+              <TouchableOpacity
+                key={tab.value}
+                onPress={() => setActiveTab(tab.value)}
                 style={{
-                  fontSize: 14,
-                  fontWeight: active ? '700' : '500',
-                  color: active ? '#fff' : COLORS.secondary,
+                  paddingHorizontal: 16,
+                  paddingVertical: 12,
+                  borderRadius: 20,
+                  backgroundColor: active ? COLORS.primary : '#edeeed',
                 }}
               >
-                {tab.label}
-                {count > 0 ? ` · ${count}` : ''}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: active ? '700' : '500',
+                    color: active ? '#fff' : COLORS.secondary,
+                  }}
+                >
+                  {tab.label}
+                  {count > 0 ? ` · ${count}` : ''}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </View>
 
       {/* Listing list */}
       <FlatList
         data={filtered}
-        style={{flex: 1}}
+        style={{ flex: 1 }}
         keyExtractor={item => item.id}
         contentContainerStyle={{ gap: 10, paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
