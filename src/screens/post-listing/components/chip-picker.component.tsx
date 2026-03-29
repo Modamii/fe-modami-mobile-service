@@ -11,14 +11,14 @@ type Props = Readonly<{
 
 export function ChipPicker({ options, selected, onSelect, labelMap }: Props) {
   return (
-    <View className="flex-row flex-wrap gap-2">
+    <View className="-mr-2 flex-row flex-wrap">
       {options.map((opt) => {
         const isSelected = selected === opt;
         return (
           <TouchableOpacity
             key={opt}
             onPress={() => onSelect(opt)}
-            className={`rounded-full px-4 py-2 ${isSelected ? 'bg-primary' : 'bg-surface'}`}
+            className={`mb-2 mr-2 rounded-full px-4 py-2 ${isSelected ? 'bg-primary' : 'bg-surface'}`}
             style={
               isSelected
                 ? undefined

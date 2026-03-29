@@ -1,5 +1,11 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
+import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  useWindowDimensions,
+} from 'react-native';
 import Svg, { Rect } from 'react-native-svg';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -16,8 +22,29 @@ import type { PhotoItem } from '../hooks/usePostListingScreen';
 
 const MAX_PHOTOS = 6;
 const GRID_COLS = 3;
-const GRID_GAP = 10;
-const HORIZONTAL_PADDING = 40; // px-5 * 2
+/** Khớp Home (`HOME_GRID_GAP`) — Tailwind `3` = 12px */
+const GRID_GAP = 12;
+/** px-5 × 2 — khớp `windowWidth - 40` trên Home */
+const GRID_HORIZONTAL_PADDING = 40;
+
+/**
+ * Chiều rộng mỗi ô: (W − (cols−1)×gap) / cols — cùng `gap` trong style container.
+ * Dùng `style={{ gap: GRID_GAP }}` (số px) thay vì class `gap-3` để khớp công thức, tránh lệch.
+ */
+function computeGridLayout(outerWidth: number): {
+  cell: number;
+  pl: number;
+  pr: number;
+} {
+  const W = Math.max(0, outerWidth);
+  const gapTotal = GRID_GAP * (GRID_COLS - 1);
+  const cell = Math.floor((W - gapTotal) / GRID_COLS);
+  const used = GRID_COLS * cell + gapTotal;
+  const rem = W - used;
+  const pl = Math.floor(rem / 2);
+  const pr = rem - pl;
+  return { cell, pl, pr };
+}
 
 // ─── PhotoCell ────────────────────────────────────────────────────────────────
 
@@ -52,7 +79,6 @@ function PhotoCell({
   onPanUpdate,
   onPanEnd,
 }: PhotoCellProps) {
-  // Refs giữ callback mới nhất — gesture (memo []) không bị stale closure
   const onLongPressStartRef = useRef(onLongPressStart);
   onLongPressStartRef.current = onLongPressStart;
   const onPanUpdateRef = useRef(onPanUpdate);
@@ -62,9 +88,9 @@ function PhotoCell({
   const indexRef = useRef(index);
   indexRef.current = index;
 
-  // Stable wrappers — identity không đổi, delegate đến ref.current
   const stableLongPressStart = useCallback(
-    (idx: number, ax: number, ay: number) => onLongPressStartRef.current(idx, ax, ay),
+    (idx: number, ax: number, ay: number) =>
+      onLongPressStartRef.current(idx, ax, ay),
     [],
   );
   const stablePanUpdate = useCallback(
@@ -80,12 +106,16 @@ function PhotoCell({
     () =>
       Gesture.LongPress()
         .minDuration(250)
-        .onStart((e) => {
+        .onStart(e => {
           'worklet';
           ghostX.value = e.absoluteX;
           ghostY.value = e.absoluteY;
           isDraggingShared.value = true;
-          runOnJS(stableLongPressStart)(indexRef.current, e.absoluteX, e.absoluteY);
+          runOnJS(stableLongPressStart)(
+            indexRef.current,
+            e.absoluteX,
+            e.absoluteY,
+          );
         }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
@@ -95,13 +125,13 @@ function PhotoCell({
     () =>
       Gesture.Pan()
         .activateAfterLongPress(250)
-        .onUpdate((e) => {
+        .onUpdate(e => {
           'worklet';
           ghostX.value = e.absoluteX;
           ghostY.value = e.absoluteY;
           runOnJS(stablePanUpdate)(e.absoluteX, e.absoluteY);
         })
-        .onEnd((e) => {
+        .onEnd(e => {
           'worklet';
           isDraggingShared.value = false;
           runOnJS(stablePanEnd)(e.absoluteX, e.absoluteY);
@@ -114,30 +144,31 @@ function PhotoCell({
     [],
   );
 
-  const gesture = useMemo(() => Gesture.Simultaneous(longPress, pan), [longPress, pan]);
+  const gesture = useMemo(
+    () => Gesture.Simultaneous(longPress, pan),
+    [longPress, pan],
+  );
 
   return (
     <GestureDetector gesture={gesture}>
-      {/* Outer: border ring (overflow visible để border không bị clip) */}
       <View
-        style={[
-          styles.cellOuter,
-          { width: cellSize, height: cellSize },
-          isDragSource && styles.cellDragging,
-          isDropTarget && styles.cellDropTarget,
-        ]}
+        className={`rounded-xl ${isDragSource ? 'opacity-25' : ''} ${isDropTarget ? 'border-[2.5px] border-primary' : ''}`}
+        style={{ width: cellSize, height: cellSize }}
       >
-        {/* Inner: clip ảnh theo bo góc */}
-        <View style={styles.cellInner}>
-          <Image source={{ uri: photo.uri }} style={styles.cellImage} resizeMode="cover" />
+        <View className="flex-1 rounded-[10px] overflow-hidden">
+          <Image
+            source={{ uri: photo.uri }}
+            className="w-full h-full"
+            resizeMode="cover"
+          />
           {isCover && !isDragSource && (
-            <View style={styles.coverBadge}>
-              <Text style={styles.coverText}>Bìa</Text>
+            <View className="absolute bottom-1.5 left-1.5 rounded-md bg-primary/80 px-1.5 py-0.5">
+              <Text className="text-[10px] font-semibold text-white">Bìa</Text>
             </View>
           )}
           <TouchableOpacity
             onPress={() => onRemove(photo.id)}
-            style={styles.removeBtn}
+            className="absolute top-1 right-1 rounded-full bg-black/50 p-0.5"
             hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
           >
             <XMarkIcon size={14} color="white" />
@@ -150,25 +181,38 @@ function PhotoCell({
 
 // ─── DashedEmptyCell ──────────────────────────────────────────────────────────
 
-function DashedEmptyCell({ size, slotNumber }: { size: number; slotNumber: number }) {
+function DashedEmptyCell({
+  size,
+  slotNumber,
+}: {
+  size: number;
+  slotNumber: number;
+}) {
   const r = 12;
   return (
-    <View style={[styles.dashedCell, { width: size, height: size }]}>
-      <Svg style={StyleSheet.absoluteFillObject} width={size} height={size}>
-        <Rect
-          x={1}
-          y={1}
-          width={size - 2}
-          height={size - 2}
-          rx={r}
-          ry={r}
-          fill={COLORS.surfaceContainer}
-          stroke={COLORS.outlineVariant}
-          strokeWidth={1}
-          strokeDasharray="5,4"
-        />
-      </Svg>
-      <Text style={styles.slotLabel}>{slotNumber}/{MAX_PHOTOS}</Text>
+    <View
+      className="items-center justify-center"
+      style={{ width: size, height: size }}
+    >
+      <View className="absolute inset-0" pointerEvents="none">
+        <Svg width={size} height={size}>
+          <Rect
+            x={1}
+            y={1}
+            width={size - 2}
+            height={size - 2}
+            rx={r}
+            ry={r}
+            fill={COLORS.surfaceContainer}
+            stroke={COLORS.outlineVariant}
+            strokeWidth={1}
+            strokeDasharray="5,4"
+          />
+        </Svg>
+      </View>
+      <Text className="text-xs font-medium text-secondary">
+        {slotNumber}/{MAX_PHOTOS}
+      </Text>
     </View>
   );
 }
@@ -193,8 +237,22 @@ export function PhotoGrid({
   onDragEnd,
 }: Props) {
   const { width: windowWidth } = useWindowDimensions();
-  const cellSize =
-    (windowWidth - HORIZONTAL_PADDING - GRID_GAP * (GRID_COLS - 1)) / GRID_COLS;
+  const [gridRowWidth, setGridRowWidth] = useState(0);
+  const gridPadLeftRef = useRef(0);
+
+  const gridMetrics = useMemo(() => {
+    const W =
+      gridRowWidth > 0
+        ? gridRowWidth
+        : Math.max(0, windowWidth - GRID_HORIZONTAL_PADDING);
+    return computeGridLayout(W);
+  }, [gridRowWidth, windowWidth]);
+
+  const cellSize = gridMetrics.cell;
+
+  useLayoutEffect(() => {
+    gridPadLeftRef.current = gridMetrics.pl;
+  }, [gridMetrics.pl]);
 
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const dragIndexRef = useRef<number | null>(null);
@@ -218,7 +276,7 @@ export function PhotoGrid({
   }
 
   function getHoveredIndex(absX: number, absY: number): number | null {
-    const relX = absX - gridOriginRef.current.x;
+    const relX = absX - gridOriginRef.current.x - gridPadLeftRef.current;
     const relY = absY - gridOriginRef.current.y;
     const stride = cellSize + GRID_GAP;
     const col = Math.floor(relX / stride);
@@ -285,8 +343,21 @@ export function PhotoGrid({
   }));
 
   return (
-    <View ref={gridRef} onLayout={measureGrid} style={styles.container}>
-      <View style={styles.grid}>
+    <View className="relative w-full">
+      <View
+        ref={gridRef}
+        collapsable={false}
+        className="w-full flex-row flex-wrap self-stretch"
+        style={{
+          gap: GRID_GAP,
+          paddingLeft: gridMetrics.pl,
+          paddingRight: gridMetrics.pr,
+        }}
+        onLayout={(e) => {
+          setGridRowWidth(e.nativeEvent.layout.width);
+          measureGrid();
+        }}
+      >
         {photos.map((photo, index) => (
           <PhotoCell
             key={photo.id}
@@ -295,7 +366,9 @@ export function PhotoGrid({
             cellSize={cellSize}
             isCover={index === 0}
             isDragSource={dragIndex === index}
-            isDropTarget={hoverIndex === index && dragIndex !== null && dragIndex !== index}
+            isDropTarget={
+              hoverIndex === index && dragIndex !== null && dragIndex !== index
+            }
             onRemove={onRemove}
             ghostX={ghostX}
             ghostY={ghostY}
@@ -310,28 +383,35 @@ export function PhotoGrid({
           <TouchableOpacity
             onPress={onAdd}
             activeOpacity={0.7}
-            style={[styles.dashedCell, { width: cellSize, height: cellSize }]}
+            className="items-center justify-center"
+            style={{ width: cellSize, height: cellSize }}
           >
-            <Svg style={StyleSheet.absoluteFillObject} width={cellSize} height={cellSize}>
-              <Rect
-                x={1}
-                y={1}
-                width={cellSize - 2}
-                height={cellSize - 2}
-                rx={12}
-                ry={12}
-                fill={COLORS.surface}
-                stroke={COLORS.outlineVariant}
-                strokeWidth={1}
-                strokeDasharray="5,4"
-              />
-            </Svg>
+            <View className="absolute inset-0" pointerEvents="none">
+              <Svg width={cellSize} height={cellSize}>
+                <Rect
+                  x={1}
+                  y={1}
+                  width={cellSize - 2}
+                  height={cellSize - 2}
+                  rx={12}
+                  ry={12}
+                  fill={COLORS.surface}
+                  stroke={COLORS.outlineVariant}
+                  strokeWidth={1}
+                  strokeDasharray="5,4"
+                />
+              </Svg>
+            </View>
             <CameraIcon size={22} color={COLORS.secondary} />
-            <Text style={styles.addText}>Thêm ảnh</Text>
+            <Text className="mt-1.5 text-[11px] font-medium text-secondary">
+              Thêm ảnh
+            </Text>
           </TouchableOpacity>
         )}
 
-        {Array.from({ length: Math.max(0, MAX_PHOTOS - photos.length - 1) }).map((_, i) => (
+        {Array.from({
+          length: Math.max(0, MAX_PHOTOS - photos.length - 1),
+        }).map((_, i) => (
           <DashedEmptyCell
             key={`empty-${i}`}
             size={cellSize}
@@ -342,96 +422,17 @@ export function PhotoGrid({
 
       {dragIndex !== null && photos[dragIndex] && (
         <Animated.View style={ghostStyle} pointerEvents="none">
-          <Image source={{ uri: photos[dragIndex].uri }} style={styles.ghostImage} resizeMode="cover" />
+          <Image
+            source={{ uri: photos[dragIndex].uri }}
+            className="h-full w-full rounded-xl"
+            resizeMode="cover"
+          />
         </Animated.View>
       )}
 
-      <Text style={styles.hint}>
+      <Text className="mt-2 text-xs text-secondary">
         Giữ và kéo để sắp xếp · Ảnh đầu là ảnh bìa · Tối đa 6 ảnh
       </Text>
     </View>
   );
 }
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
-const styles = StyleSheet.create({
-  container: {
-    position: 'relative',
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginHorizontal: -(GRID_GAP / 2),
-  },
-  // Outer: giữ border ring, không clip
-  cellOuter: {
-    borderRadius: 12,
-    margin: GRID_GAP / 2,
-  },
-  // Inner: clip ảnh theo bo góc
-  cellInner: {
-    flex: 1,
-    borderRadius: 10, // nhỏ hơn outer 2px để không tràn ra ngoài border
-    overflow: 'hidden',
-  },
-  cellDragging: {
-    opacity: 0.25,
-  },
-  cellDropTarget: {
-    borderWidth: 2.5,
-    borderColor: COLORS.primary,
-  },
-  cellImage: {
-    width: '100%',
-    height: '100%',
-  },
-  coverBadge: {
-    position: 'absolute',
-    bottom: 6,
-    left: 6,
-    backgroundColor: 'rgba(39,79,56,0.82)',
-    borderRadius: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  coverText: {
-    color: 'white',
-    fontSize: 10,
-    fontWeight: '600',
-  },
-  removeBtn: {
-    position: 'absolute',
-    top: 4,
-    right: 4,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    borderRadius: 99,
-    padding: 2,
-  },
-  addText: {
-    fontSize: 11,
-    color: COLORS.secondary,
-    fontWeight: '500',
-    marginTop: 6,
-  },
-  dashedCell: {
-    margin: GRID_GAP / 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  slotLabel: {
-    fontSize: 12,
-    color: COLORS.secondary,
-    fontWeight: '500',
-  },
-  ghostImage: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 12,
-  },
-  hint: {
-    fontSize: 12,
-    color: COLORS.secondary,
-    marginTop: 8,
-  },
-});

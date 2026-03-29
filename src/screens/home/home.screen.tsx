@@ -1,28 +1,28 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import logoDark from '@/assets/logos/logo-text-dark.webp';
+import { ProductCard } from '@/components/molecules/product-card.component';
+import { COLORS } from '@/constants/app.constants';
+import { productKeys } from '@/hooks/queries/product.queries';
+import type { MainTabScreenProps } from '@/navigation/navigation.type';
+import type { Product } from '@/types/app.type';
+import { useQueryClient } from '@tanstack/react-query';
+import React, { useCallback, useMemo } from 'react';
 import {
   Image,
+  RefreshControl,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
   useWindowDimensions,
-  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import type { MainTabScreenProps } from '@/navigation/navigation.type';
-import { ProductCard } from '@/components/molecules/product-card.component';
-import { useHomeScreen } from './hooks/useHomeScreen';
-import { HomeHeader } from './components/home-header.component';
-import { NewArrivalsSection } from './components/new-arrivals-section.component';
 import { CategorySection } from './components/category-section.component';
-import { NearbySection } from './components/nearby-section.component';
-import { TrendsSection } from './components/trends-section.component';
+import { HomeHeader } from './components/home-header.component';
 import { HomeScreenSkeleton } from './components/home-skeleton.component';
-import { useQueryClient } from '@tanstack/react-query';
-import { productKeys } from '@/hooks/queries/product.queries';
-import type { Product } from '@/types/app.type';
-import { COLORS } from '@/constants/app.constants';
-import logoDark from '@/assets/logos/logo-text-dark.webp';
+import { NearbySection } from './components/nearby-section.component';
+import { NewArrivalsSection } from './components/new-arrivals-section.component';
+import { TrendsSection } from './components/trends-section.component';
+import { useHomeScreen } from './hooks/useHomeScreen';
 
 type Props = MainTabScreenProps<'Home'>;
 
@@ -31,23 +31,24 @@ const HOME_GRID_COLS = 2;
 
 export function HomeScreen({ navigation }: Props) {
   const queryClient = useQueryClient();
-  const [trendGridRowWidth, setTrendGridRowWidth] = useState(0);
 
-  const navigateToProduct = useCallback((product: Product) => {
-    if (!queryClient.getQueryData(productKeys.detail(product.id))) {
-      queryClient.setQueryData(productKeys.detail(product.id), { data: product });
-    }
-    navigation.navigate('ProductDetail', { productId: product.id });
-  }, [queryClient, navigation]);
+  const navigateToProduct = useCallback(
+    (product: Product) => {
+      if (!queryClient.getQueryData(productKeys.detail(product.id))) {
+        queryClient.setQueryData(productKeys.detail(product.id), {
+          data: product,
+        });
+      }
+      navigation.navigate('ProductDetail', { productId: product.id });
+    },
+    [queryClient, navigation],
+  );
   const { width: windowWidth } = useWindowDimensions();
 
   const homeGridColumnWidth = useMemo(() => {
-    const available =
-      trendGridRowWidth > 0
-        ? trendGridRowWidth
-        : Math.max(0, windowWidth - 40);
-    return (available - HOME_GRID_GAP * (HOME_GRID_COLS - 1)) / HOME_GRID_COLS;
-  }, [trendGridRowWidth, windowWidth]);
+    const available = Math.max(0, windowWidth - 40);
+    return (available - HOME_GRID_GAP) / HOME_GRID_COLS;
+  }, [windowWidth]);
 
   const {
     user,
@@ -128,24 +129,23 @@ export function HomeScreen({ navigation }: Props) {
         <TrendsSection
           data={trends}
           onSeeAll={() => navigation.navigate('TrendsList')}
-          onItemPress={(blogId) => navigation.navigate('BlogDetail', { blogId })}
+          onItemPress={blogId => navigation.navigate('BlogDetail', { blogId })}
         />
 
-        <View className="px-5 pt-4 mb-6">
+        <View className="pt-4 mb-6" style={{ paddingHorizontal: 20 }}>
           <Text className="text-xl font-bold text-on-surface mb-3 tracking-tight">
             Xu hướng tuần này
           </Text>
           <View
             className="flex-row flex-wrap w-full"
-            style={{ gap: HOME_GRID_GAP, alignItems: 'stretch' }}
-            onLayout={(e) => setTrendGridRowWidth(e.nativeEvent.layout.width)}
+            style={{ gap: HOME_GRID_GAP }}
           >
-            {allProducts.map((product) => (
-              <View key={product.id} style={{ width: homeGridColumnWidth }}>
-                <ProductCard
-                  product={product}
-                  onPress={navigateToProduct}
-                />
+            {allProducts.map(product => (
+              <View
+                key={product.id}
+                style={{ width: homeGridColumnWidth }}
+              >
+                <ProductCard product={product} onPress={navigateToProduct} />
               </View>
             ))}
           </View>

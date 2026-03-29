@@ -31,8 +31,8 @@ export function BasicInfoSection({ control, errors }: Props) {
         )}
       />
 
-      <View className="flex-row gap-3">
-        <View className="flex-1">
+      <View className="flex-row">
+        <View className="mr-3 min-w-0 flex-1">
           <Controller
             control={control}
             name="price"
@@ -49,7 +49,7 @@ export function BasicInfoSection({ control, errors }: Props) {
             )}
           />
         </View>
-        <View className="flex-1">
+        <View className="min-w-0 flex-1">
           <Controller
             control={control}
             name="brand"
