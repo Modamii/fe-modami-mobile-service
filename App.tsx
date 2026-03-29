@@ -3,6 +3,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { StatusBar } from 'react-native';
 import { RootNavigator } from '@/navigation/root.navigator';
 import { QueryProvider } from '@/providers/query.provider';
@@ -18,10 +19,12 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryProvider>
-          <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
-          <NavigationContainer>
-            <RootNavigator />
-          </NavigationContainer>
+          <BottomSheetModalProvider>
+            <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+            <NavigationContainer>
+              <RootNavigator />
+            </NavigationContainer>
+          </BottomSheetModalProvider>
         </QueryProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

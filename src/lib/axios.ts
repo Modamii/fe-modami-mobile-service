@@ -80,7 +80,12 @@ axiosClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    if (status === 401 && !original._retry) {
+    const isAuthEndpoint =
+      original?.url?.includes('/auth/login') ||
+      original?.url?.includes('/auth/register') ||
+      original?.url?.includes('/auth/otp');
+
+    if (status === 401 && !original._retry && !isAuthEndpoint) {
       if (isRefreshing) {
         return new Promise(resolve => {
           pendingQueue.push(token => {
@@ -112,7 +117,7 @@ axiosClient.interceptors.response.use(
     const fieldError = apiError?.errors?.[0]?.message;
     const message =
       fieldError ??
-      apiError?.message ??
+      (typeof apiError === 'string' ? apiError : apiError?.message) ??
       error.response?.data?.message ??
       error.message;
     return Promise.reject(new Error(message));

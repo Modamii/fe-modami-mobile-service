@@ -1,7 +1,7 @@
 import { mockNotifications } from '@/data/mock-notifications.mock';
 import { tokenStorage } from '@/lib/token.storage';
 import { authService } from '@/services/auth.service';
-import { userProfileToUser, userService } from '@/services/user.service';
+import { userProfileToUser, userService, type UpdateProfileRequest } from '@/services/user.service';
 import type {
   MembershipBillingCycle,
   MembershipTierId,
@@ -72,6 +72,8 @@ export interface AuthState {
   updateProfile: (
     patch: Partial<Pick<User, 'name' | 'bio' | 'location' | 'avatar'>>,
   ) => void;
+  updateProfileApi: (data: UpdateProfileRequest) => Promise<void>;
+  updateAvatarApi: (avatarUrl: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -169,6 +171,22 @@ export const useAuthStore = create<AuthState>()(
             next.avatar = patch.avatar?.trim() || undefined;
           }
           return { user: next };
+        });
+      },
+
+      updateProfileApi: async data => {
+        const profile = await userService.updateProfile(data);
+        set(s => {
+          if (!s.user) return s;
+          return { user: { ...s.user, ...userProfileToUser(profile) } };
+        });
+      },
+
+      updateAvatarApi: async avatarUrl => {
+        await userService.updateAvatar(avatarUrl);
+        set(s => {
+          if (!s.user) return s;
+          return { user: { ...s.user, avatar: avatarUrl } };
         });
       },
     }),

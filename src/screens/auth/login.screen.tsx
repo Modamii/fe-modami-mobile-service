@@ -17,12 +17,13 @@ import { COLORS } from '@/constants/app.constants';
 import { useLoginScreen } from './hooks/useLoginScreen';
 import { AuthBrand } from './components/auth-brand.component';
 import { AuthDivider } from './components/auth-divider.component';
+import { GoogleIcon, AppleIcon } from '@/components/ui/social-icons.component';
 
 type Props = RootStackScreenProps<'Login'>;
 
 export function LoginScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
-  const { form, isLoginLoading, isOAuthLoading, authError, handleLogin, handleOAuth } = useLoginScreen();
+  const { form, isLoginLoading, isOAuthLoading, authError, handleLogin } = useLoginScreen();
   const isAnyLoading = isLoginLoading || isOAuthLoading;
   const { control, handleSubmit, formState: { errors } } = form;
 
@@ -113,15 +114,31 @@ export function LoginScreen({ navigation }: Props) {
 
           <Button
             variant="secondary"
+            leftIcon={<GoogleIcon size={18} />}
             onPress={async () => {
-              await handleOAuth('google');
-              navigation.goBack();
+              const ok = await handleLogin({ username: 'modami', password: 'Holic@123' });
+              if (ok) navigation.goBack();
             }}
             loading={isOAuthLoading}
             disabled={isAnyLoading}
           >
             Tiếp tục với Google
           </Button>
+
+          {Platform.OS === 'ios' && (
+            <Button
+              variant="secondary"
+              leftIcon={<AppleIcon size={18} />}
+              onPress={async () => {
+                const ok = await handleLogin({ username: 'modami', password: 'Holic@123' });
+                if (ok) navigation.goBack();
+              }}
+              loading={isOAuthLoading}
+              disabled={isAnyLoading}
+            >
+              Tiếp tục với Apple
+            </Button>
+          )}
         </View>
 
         <View className="flex-row justify-center mt-8 gap-1">

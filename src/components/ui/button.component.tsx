@@ -3,6 +3,7 @@ import {
   TouchableOpacity,
   Text,
   ActivityIndicator,
+  View,
   type TouchableOpacityProps,
 } from 'react-native';
 
@@ -14,6 +15,7 @@ interface ButtonProps extends TouchableOpacityProps {
   variant?: Variant;
   size?: Size;
   loading?: boolean;
+  leftIcon?: React.ReactNode;
 }
 
 const variantStyles: Record<Variant, string> = {
@@ -52,6 +54,7 @@ export function Button({
   size = 'md',
   loading = false,
   disabled,
+  leftIcon,
   className,
   ...props
 }: ButtonProps) {
@@ -66,9 +69,12 @@ export function Button({
       {loading ? (
         <ActivityIndicator color={variant === 'primary' ? '#ffffff' : '#274f38'} size="small" />
       ) : (
-        <Text className={`${textStyles[variant]} ${textSizeStyles[size]}`}>
-          {children}
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          {leftIcon}
+          <Text className={`${textStyles[variant]} ${textSizeStyles[size]}`}>
+            {children}
+          </Text>
+        </View>
       )}
     </TouchableOpacity>
   );

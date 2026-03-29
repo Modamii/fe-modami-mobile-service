@@ -26,6 +26,7 @@ export type RootStackParamList = {
   BlogDetail: { blogId: string };
   TrendsList: undefined;
   Notifications: undefined;
+  NotificationDetail: { notificationId: string };
   Conversation: { conversationId: string; participantName: string };
   Membership: undefined;
   Credits: undefined;
@@ -34,6 +35,7 @@ export type RootStackParamList = {
   Saved: undefined;
   MyListings: undefined;
   ListingDetail: { listingId: string };
+  OrderHistory: undefined;
   // ── Auth (modal presentations) ──────────────────────────────────────────
   Login: undefined;
   Register: undefined;

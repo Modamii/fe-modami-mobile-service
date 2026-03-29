@@ -3,11 +3,15 @@ import { Alert } from 'react-native';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   launchCamera,
   launchImageLibrary,
   type Asset,
 } from 'react-native-image-picker';
+import { listingService } from '@/services/listing.service';
+import { listingKeys } from '@/hooks/queries/listing.queries';
+import type { ProductCondition } from '@/types/app.type';
 
 export type PhotoItem = {
   id: string;
@@ -31,8 +35,10 @@ export const postListingSchema = z.object({
 
 export type PostListingFormValues = z.infer<typeof postListingSchema>;
 
-export function usePostListingScreen() {
+export function usePostListingScreen(onSuccess?: () => void) {
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+  const queryClient = useQueryClient();
 
   const form = useForm<PostListingFormValues>({
     resolver: zodResolver(postListingSchema),
@@ -95,15 +101,38 @@ export function usePostListingScreen() {
     setPhotos(reordered);
   }
 
-  const onSubmit = form.handleSubmit(() => {
-    Alert.alert('Đã đăng bán!', 'Sản phẩm của bạn đang chờ kiểm duyệt.', [
-      { text: 'OK' },
-    ]);
+  const onSubmit = form.handleSubmit(async (values) => {
+    setSubmitting(true);
+    try {
+      await listingService.submitListing({
+        title: values.title,
+        price: Number(values.price.replace(/[.,]/g, '')),
+        images: photos.map((p) => p.uri),
+        category: values.category,
+        condition: values.condition as ProductCondition,
+        brand: values.brand || undefined,
+        description: values.description || undefined,
+        size: values.size || undefined,
+      });
+      await queryClient.invalidateQueries({ queryKey: listingKeys.mine() });
+      form.reset();
+      setPhotos([]);
+      Alert.alert(
+        'Đã gửi bài đăng!',
+        'Sản phẩm của bạn đang chờ kiểm duyệt bởi đội ngũ ModaMi. Chúng tôi sẽ thông báo kết quả trong 24 giờ.',
+        [{ text: 'Xem bài đăng', onPress: onSuccess }, { text: 'Đóng' }],
+      );
+    } catch (err: any) {
+      Alert.alert('Lỗi', err?.message ?? 'Không thể gửi bài đăng. Vui lòng thử lại.');
+    } finally {
+      setSubmitting(false);
+    }
   });
 
   return {
     form,
     photos,
+    submitting,
     handleAddPhoto,
     handleRemovePhoto,
     handleReorderPhotos,

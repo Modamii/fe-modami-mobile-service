@@ -11,6 +11,7 @@ import {
   PencilSquareIcon,
   BookmarkIcon,
   ClipboardDocumentListIcon,
+  ShoppingBagIcon,
 } from 'react-native-heroicons/outline';
 import { useProductStore } from '@/store/app.store';
 import type { MainTabScreenProps } from '@/navigation/navigation.type';
@@ -80,6 +81,11 @@ export function ProfileScreen({ navigation }: Props) {
       onPress: () => navigation.navigate('MyListings'),
     },
     {
+      icon: ShoppingBagIcon,
+      label: 'Lịch sử mua hàng',
+      onPress: () => navigation.navigate('OrderHistory'),
+    },
+    {
       icon: BookmarkIcon,
       label: 'Đã lưu',
       badge: savedCount > 0 ? String(savedCount) : undefined,
@@ -126,6 +132,9 @@ export function ProfileScreen({ navigation }: Props) {
             )}
             <View className="flex-1">
               <Text className="text-lg font-bold text-on-surface">{user.name}</Text>
+              {user.username && (
+                <Text className="text-xs text-secondary font-medium">@{user.username}</Text>
+              )}
               <Text className="text-sm text-secondary">{user.email}</Text>
               <View className="flex-row items-center gap-2 mt-1">
                 <View className="bg-primary/10 rounded-full px-2 py-0.5">

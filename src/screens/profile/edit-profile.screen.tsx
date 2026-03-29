@@ -1,62 +1,51 @@
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
+  TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { Controller } from 'react-hook-form';
+import { ShieldExclamationIcon, CheckCircleIcon } from 'react-native-heroicons/outline';
 import type { RootStackScreenProps } from '@/navigation/navigation.type';
-import { useAuthStore } from '@/store/app.store';
 import { Input } from '@/components/ui/input.component';
 import { Button } from '@/components/ui/button.component';
+import { DatePickerInput } from '@/components/ui/date-picker-input.component';
+import { COLORS } from '@/constants/app.constants';
+import { useEditProfileScreen } from './hooks/useEditProfileScreen';
+import { GenderPicker } from './components/gender-picker.component';
+import { OtpVerifySheet } from './components/otp-verify-sheet.component';
 
 type Props = RootStackScreenProps<'EditProfile'>;
 
 export function EditProfileScreen({ navigation }: Props) {
-  const user = useAuthStore((s) => s.user);
-  const updateProfile = useAuthStore((s) => s.updateProfile);
+  const {
+    form,
+    user,
+    emailChanged,
+    emailVerified,
+    sendingOtp,
+    otp,
+    setOtp,
+    otpError,
+    setOtpError,
+    verifying,
+    saving,
+    keyboardHeight,
+    bottomSheetRef,
+    handleSendOtp,
+    handleVerifyOtp,
+    handleCloseSheet,
+    handleSave,
+  } = useEditProfileScreen(() => navigation.goBack());
 
-  const [name, setName] = useState('');
-  const [bio, setBio] = useState('');
-  const [location, setLocation] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
-  const [nameError, setNameError] = useState('');
+  const { control, formState: { errors }, watch } = form;
+  const currentEmail = watch('email');
 
-  useFocusEffect(
-    useCallback(() => {
-      if (!user) return;
-      setName(user.name);
-      setBio(user.bio ?? '');
-      setLocation(user.location ?? '');
-      setAvatarUrl(user.avatar ?? '');
-      setNameError('');
-    }, [user]),
-  );
-
-  const handleSave = () => {
-    const trimmedName = name.trim();
-    if (!trimmedName) {
-      setNameError('Vui lòng nhập tên hiển thị');
-      return;
-    }
-    setNameError('');
-    updateProfile({
-      name: trimmedName,
-      bio: bio.trim() || undefined,
-      location: location.trim() || undefined,
-      avatar: avatarUrl.trim() || undefined,
-    });
-    Alert.alert('Đã lưu', 'Hồ sơ của bạn đã được cập nhật.', [
-      { text: 'OK', onPress: () => navigation.goBack() },
-    ]);
-  };
-
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   return (
     <KeyboardAvoidingView
@@ -67,70 +56,170 @@ export function EditProfileScreen({ navigation }: Props) {
         className="flex-1"
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        contentContainerClassName="px-5 pb-10 pt-2"
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 48, paddingTop: 8 }}
       >
         <Text className="text-sm text-secondary mb-4 leading-5">
           Thông tin hiển thị trên cửa hàng và khi bạn mua bán với cộng đồng ModaMi.
         </Text>
 
         <View className="gap-4">
-          <Input
-            label="Tên hiển thị *"
-            value={name}
-            onChangeText={(t) => {
-              setName(t);
-              if (nameError) setNameError('');
-            }}
-            placeholder="VD: Minh Curator"
-            error={nameError}
-            autoCapitalize="words"
+          {/* Full name */}
+          <Controller
+            control={control}
+            name="full_name"
+            render={({ field: { onChange, onBlur, value, ref } }) => (
+              <Input
+                ref={ref}
+                label="Tên hiển thị *"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                placeholder="VD: Minh Curator"
+                error={errors.full_name?.message}
+                autoCapitalize="words"
+              />
+            )}
           />
 
-          <View className="gap-1">
-            <Text className="text-sm font-medium text-on-surface/70">Email</Text>
-            <View className="bg-surface-container/80 rounded-xl px-4 py-3 border border-transparent">
-              <Text className="text-base text-secondary">{user.email}</Text>
+          {/* Username — read-only */}
+          {user.username && (
+            <View className="gap-1">
+              <Text className="text-sm font-medium text-on-surface/70">Tên đăng nhập</Text>
+              <View className="h-[50px] bg-surface-container/60 rounded-xl px-4 justify-center border border-transparent">
+                <Text className="text-base text-secondary">@{user.username}</Text>
+              </View>
+              <Text className="text-xs text-secondary">Tên đăng nhập không thể thay đổi.</Text>
             </View>
-            <Text className="text-xs text-secondary">
-              Email dùng đăng nhập — liên hệ hỗ trợ nếu cần đổi.
-            </Text>
-          </View>
+          )}
 
-          <Input
-            label="Địa điểm"
-            value={location}
-            onChangeText={setLocation}
-            placeholder="VD: Quận 1, TP. Hồ Chí Minh"
+          {/* Phone */}
+          <Controller
+            control={control}
+            name="phone"
+            render={({ field: { onChange, onBlur, value, ref } }) => (
+              <Input
+                ref={ref}
+                label="Số điện thoại"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                placeholder="VD: 0901234567"
+                keyboardType="phone-pad"
+                error={errors.phone?.message}
+              />
+            )}
           />
 
-          <Input
-            label="Giới thiệu ngắn"
-            value={bio}
-            onChangeText={setBio}
-            placeholder="Chia sẻ phong cách, niche bạn tuyển chọn đồ…"
-            multiline
-            numberOfLines={4}
-            style={{ minHeight: 100, textAlignVertical: 'top' }}
+          {/* Email with verify */}
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, onBlur, value, ref } }) => (
+              <Input
+                ref={ref}
+                label="Email"
+                value={value}
+                onChangeText={t => {
+                  onChange(t);
+                  // reset verified when email changes
+                }}
+                onBlur={onBlur}
+                placeholder="email@example.com"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                error={errors.email?.message}
+                rightElement={
+                  emailVerified && !emailChanged ? (
+                    <CheckCircleIcon size={20} color="#22c55e" />
+                  ) : emailChanged ? (
+                    <TouchableOpacity
+                      onPress={handleSendOtp}
+                      disabled={sendingOtp}
+                      hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
+                    >
+                      {sendingOtp ? (
+                        <ActivityIndicator size="small" color={COLORS.primary} />
+                      ) : (
+                        <ShieldExclamationIcon size={20} color={COLORS.primary} />
+                      )}
+                    </TouchableOpacity>
+                  ) : null
+                }
+              />
+            )}
           />
 
-          <Input
-            label="Ảnh đại diện (URL)"
-            value={avatarUrl}
-            onChangeText={setAvatarUrl}
-            placeholder="https://…"
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="url"
+          {/* Gender */}
+          <Controller
+            control={control}
+            name="gender"
+            render={({ field: { value, onChange } }) => (
+              <GenderPicker value={value} onChange={onChange} />
+            )}
+          />
+
+          {/* Date of birth */}
+          <Controller
+            control={control}
+            name="date_of_birth"
+            render={({ field: { value, onChange } }) => (
+              <DatePickerInput
+                label="Ngày sinh"
+                value={value}
+                onChange={onChange}
+                error={errors.date_of_birth?.message}
+              />
+            )}
+          />
+
+          {/* Bio */}
+          <Controller
+            control={control}
+            name="bio"
+            render={({ field: { onChange, onBlur, value, ref } }) => (
+              <Input
+                ref={ref}
+                label="Giới thiệu ngắn"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                placeholder="Chia sẻ phong cách, niche bạn tuyển chọn đồ…"
+                multiline
+                numberOfLines={4}
+                style={{ height: 100, textAlignVertical: 'top', paddingTop: 10 }}
+                error={errors.bio?.message}
+              />
+            )}
           />
         </View>
 
         <View className="mt-8 gap-3">
-          <Button onPress={handleSave}>Lưu thay đổi</Button>
+          <Button onPress={handleSave} loading={saving}>
+            Lưu thay đổi
+          </Button>
           <Button variant="secondary" onPress={() => navigation.goBack()}>
             Huỷ
           </Button>
         </View>
       </ScrollView>
+
+      <OtpVerifySheet
+        sheetRef={bottomSheetRef}
+        email={currentEmail}
+        otp={otp}
+        onOtpChange={text => {
+          setOtp(text);
+          if (otpError) setOtpError(false);
+        }}
+        otpError={otpError}
+        verifying={verifying}
+        sendingOtp={sendingOtp}
+        keyboardHeight={keyboardHeight}
+        onVerify={handleVerifyOtp}
+        onResend={handleSendOtp}
+        onClose={handleCloseSheet}
+      />
     </KeyboardAvoidingView>
   );
 }

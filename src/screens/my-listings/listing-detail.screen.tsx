@@ -14,8 +14,10 @@ import {
   ArrowPathIcon,
   ShoppingBagIcon,
 } from 'react-native-heroicons/outline';
+import { useQueryClient } from '@tanstack/react-query';
 import type { RootStackScreenProps } from '@/navigation/navigation.type';
 import { useListing } from '@/hooks/queries/listing.queries';
+import { productKeys } from '@/hooks/queries/product.queries';
 import { formatPrice, timeAgo } from '@/lib/utils.helper';
 import { COLORS } from '@/constants/app.constants';
 import { SkeletonBox } from '@/components/ui/skeleton.component';
@@ -182,6 +184,7 @@ export function ListingDetailScreen({ navigation, route }: Props) {
   const { listingId } = route.params;
   const { data, isLoading } = useListing(listingId);
   const listing = data?.data ?? null;
+  const queryClient = useQueryClient();
 
   if (isLoading) return <LoadingSkeleton />;
 
@@ -254,7 +257,29 @@ export function ListingDetailScreen({ navigation, route }: Props) {
 
       {listing.status === 'approved' && listing.productId && (
         <TouchableOpacity
-          onPress={() => navigation.navigate('ProductDetail', { productId: listing.productId! })}
+          onPress={() => {
+            const productId = listing.productId!;
+            const key = productKeys.detail(productId);
+            if (!queryClient.getQueryData(key)) {
+              queryClient.setQueryData(key, {
+                success: true,
+                data: {
+                  id: productId,
+                  title: listing.title,
+                  price: listing.price,
+                  images: listing.images,
+                  category: listing.category,
+                  condition: listing.condition,
+                  createdAt: listing.submittedAt,
+                  creditCost: 0,
+                  isUnlockRequired: false,
+                  sellerId: '',
+                  sellerName: '',
+                },
+              });
+            }
+            navigation.navigate('ProductDetail', { productId });
+          }}
           style={{ backgroundColor: COLORS.primary, borderRadius: 24, height: 50, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8, marginTop: 4 }}
         >
           <ShoppingBagIcon size={18} color="#fff" />

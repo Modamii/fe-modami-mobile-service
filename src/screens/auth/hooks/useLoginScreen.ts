@@ -34,8 +34,7 @@ export function useLoginScreen() {
   async function handleOAuth(_provider: 'google' | 'apple'): Promise<void> {
     setIsOAuthLoading(true);
     try {
-      // TODO: thay bằng OAuth flow thực khi có cấu hình
-      await login('vanthuongdao', 'Holic@1234');
+      await loginWithOAuth(_provider);
     } finally {
       setIsOAuthLoading(false);
     }

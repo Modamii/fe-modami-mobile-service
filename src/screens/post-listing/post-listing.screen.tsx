@@ -24,7 +24,9 @@ type Props = MainTabScreenProps<'PostListing'>;
 
 export function PostListingScreen({ navigation }: Props) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const { form, photos, handleAddPhoto, handleRemovePhoto, handleReorderPhotos, onSubmit } = usePostListingScreen();
+  const { form, photos, submitting, handleAddPhoto, handleRemovePhoto, handleReorderPhotos, onSubmit } = usePostListingScreen(
+    () => navigation.navigate('MyListings'),
+  );
   const { control, formState: { errors } } = form;
   const scrollRef = useRef<ScrollView>(null);
   const [scrollEnabled, setScrollEnabled] = useState(true);
@@ -98,7 +100,7 @@ export function PostListingScreen({ navigation }: Props) {
           <DescriptionSection control={control} />
 
           <View className="px-5 pb-8">
-            <Button onPress={onSubmit}>Đăng bán ngay</Button>
+            <Button onPress={onSubmit} loading={submitting}>Đăng bán ngay</Button>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

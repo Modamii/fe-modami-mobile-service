@@ -1,12 +1,17 @@
 export interface User {
   id: string;
   name: string;
+  username?: string;
   email: string;
   avatar?: string;
   credits: number;
   bio?: string;
   location?: string;
   membershipTier: MembershipTierId;
+  phone?: string;
+  gender?: 'male' | 'female' | 'other' | 'undisclosed';
+  date_of_birth?: string;
+  email_verified?: boolean;
 }
 
 export type MembershipTierId = 'curator' | 'style' | 'elite';
@@ -105,12 +110,17 @@ export interface ProductFilter {
 
 export interface Notification {
   id: string;
-  type: 'like' | 'comment' | 'follow' | 'sale' | 'system';
+  type: 'like' | 'comment' | 'follow' | 'sale' | 'system' | 'news';
   title: string;
   body: string;
   isRead: boolean;
   createdAt: string;
   avatar?: string;
+  /** Nội dung chi tiết — chỉ dành cho type system/news */
+  detail?: string;
+  /** Link điều hướng khi nhấn */
+  actionRoute?: string;
+  actionId?: string;
 }
 
 export interface Message {
@@ -201,6 +211,23 @@ export interface SellerReview {
   rating: number;
   comment: string;
   boughtProductTitle: string;
+}
+
+export type OrderStatus = 'processing' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
+
+export interface Order {
+  id: string;
+  productId: string;
+  productTitle: string;
+  productImage: string;
+  productPrice: number;
+  sellerId: string;
+  sellerName: string;
+  status: OrderStatus;
+  createdAt: string;
+  updatedAt: string;
+  shippingAddress?: string;
+  trackingCode?: string;
 }
 
 export interface SellerProfile {

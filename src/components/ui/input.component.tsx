@@ -6,14 +6,16 @@ import { COLORS } from '@/constants/app.constants';
 interface InputProps extends TextInputProps {
   label?: string;
   error?: string;
+  rightElement?: React.ReactNode;
 }
 
 export const Input = forwardRef<TextInput, InputProps>(
-  ({ label, error, style, secureTextEntry, ...props }, ref) => {
+  ({ label, error, style, secureTextEntry, rightElement, ...props }, ref) => {
     const [focused, setFocused] = useState(false);
     const [passwordVisible, setPasswordVisible] = useState(false);
 
     const isPassword = secureTextEntry !== undefined && secureTextEntry !== false;
+    const hasRightSlot = isPassword || rightElement != null;
 
     const borderColor = error ? '#f87171' : focused ? COLORS.primary : '#e0e0de';
 
@@ -27,7 +29,7 @@ export const Input = forwardRef<TextInput, InputProps>(
           <TextInput
             ref={ref}
             className={`h-[50px] bg-surface-container rounded-xl px-4 text-[15px] text-on-surface border ${
-              isPassword ? 'pr-11' : ''
+              hasRightSlot ? 'pr-11' : ''
             }`}
             style={[{ borderColor }, style]}
             placeholderTextColor={COLORS.secondary}
@@ -51,6 +53,12 @@ export const Input = forwardRef<TextInput, InputProps>(
                 <EyeIcon size={20} color={COLORS.secondary} />
               )}
             </TouchableOpacity>
+          )}
+
+          {!isPassword && rightElement != null && (
+            <View className="absolute right-[14px] top-0 bottom-0 justify-center">
+              {rightElement}
+            </View>
           )}
         </View>
 

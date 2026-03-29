@@ -12,6 +12,7 @@ import { BlogDetailScreen } from '@/screens/blog/blog-detail.screen';
 import { TrendsListScreen } from '@/screens/trends/trends-list.screen';
 import { ConversationScreen } from '@/screens/messages/conversation.screen';
 import { NotificationsScreen } from '@/screens/notifications/notifications.screen';
+import { NotificationDetailScreen } from '@/screens/notifications/notification-detail.screen';
 import { MembershipScreen } from '@/screens/profile/membership.screen';
 import { CreditsScreen } from '@/screens/profile/credits.screen';
 import { DashboardScreen } from '@/screens/dashboard/dashboard.screen';
@@ -19,6 +20,7 @@ import { EditProfileScreen } from '@/screens/profile/edit-profile.screen';
 import { SavedScreen } from '@/screens/saved/saved.screen';
 import { MyListingsScreen } from '@/screens/my-listings/my-listings.screen';
 import { ListingDetailScreen } from '@/screens/my-listings/listing-detail.screen';
+import { OrderHistoryScreen } from '@/screens/orders/order-history.screen';
 import { LoginScreen } from '@/screens/auth/login.screen';
 import { RegisterScreen } from '@/screens/auth/register.screen';
 import { ForgotPasswordScreen } from '@/screens/auth/forgot-password.screen';
@@ -74,6 +76,11 @@ export function RootNavigator() {
             options={{ ...headerBase, title: 'Thông báo', animation: 'slide_from_bottom' }}
           />
           <Stack.Screen
+            name="NotificationDetail"
+            component={NotificationDetailScreen}
+            options={{ ...headerBase, title: 'Chi tiết thông báo' }}
+          />
+          <Stack.Screen
             name="Membership"
             component={MembershipScreen}
             options={{ ...headerBase, title: 'Gói thành viên' }}
@@ -107,6 +114,11 @@ export function RootNavigator() {
             name="ListingDetail"
             component={ListingDetailScreen}
             options={{ ...headerBase, title: 'Chi tiết bài đăng' }}
+          />
+          <Stack.Screen
+            name="OrderHistory"
+            component={OrderHistoryScreen}
+            options={{ ...headerBase, title: 'Lịch sử mua hàng' }}
           />
           <Stack.Screen name="Conversation" component={ConversationScreen} />
 
