@@ -30,8 +30,14 @@ const textStyles: Record<Variant, string> = {
 
 const sizeStyles: Record<Size, string> = {
   sm: 'px-3 py-2',
-  md: 'px-5 py-3',
+  md: 'px-5',
   lg: 'px-6 py-4',
+};
+
+const sizeHeights: Record<Size, number | undefined> = {
+  sm: undefined,
+  md: 50,
+  lg: undefined,
 };
 
 const textSizeStyles: Record<Size, string> = {
@@ -52,6 +58,7 @@ export function Button({
   return (
     <TouchableOpacity
       className={`${variantStyles[variant]} ${sizeStyles[size]} ${disabled || loading ? 'opacity-50' : ''} ${className ?? ''}`}
+      style={sizeHeights[size] ? { height: sizeHeights[size] } : undefined}
       disabled={disabled || loading}
       activeOpacity={0.8}
       {...props}

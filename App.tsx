@@ -7,9 +7,11 @@ import { StatusBar } from 'react-native';
 import { RootNavigator } from '@/navigation/root.navigator';
 import { QueryProvider } from '@/providers/query.provider';
 import { COLORS } from '@/constants/app.constants';
-// TODO: re-enable when iOS Client ID is configured
-// import { configureGoogleSignIn } from '@/lib/google-auth';
-// configureGoogleSignIn();
+import { setUnauthorizedHandler } from '@/lib/axios';
+import { useAuthStore } from '@/store/app.store';
+
+// Đăng ký handler: khi token hết hạn và refresh thất bại → tự động logout
+setUnauthorizedHandler(() => useAuthStore.getState().logout());
 
 export default function App() {
   return (

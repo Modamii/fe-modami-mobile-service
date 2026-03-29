@@ -37,6 +37,7 @@ export type RootStackParamList = {
   // ── Auth (modal presentations) ──────────────────────────────────────────
   Login: undefined;
   Register: undefined;
+  ForgotPassword: undefined;
   AuthPrompt: { message?: string } | undefined;
 };
 

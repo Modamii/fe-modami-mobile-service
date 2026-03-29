@@ -9,9 +9,12 @@ import type {
   MembershipBillingCycle,
   PaidMembershipTierId,
 } from '@/types/app.type';
-import { DEMO_EMAIL, DEMO_PASSWORD } from '@/constants/app.constants';
-import { mockCurrentUser } from '@/data/mock-users.mock';
+import type { AuthTokens } from '@/types/auth.types';
 import { mockNotifications } from '@/data/mock-notifications.mock';
+import { authService } from '@/services/auth.service';
+import { userService, userProfileToUser } from '@/services/user.service';
+import { tokenStorage } from '@/lib/token.storage';
+import { setUnauthorizedHandler } from '@/lib/axios';
 // TODO: re-enable when iOS Client ID is configured
 // import { signInWithGoogle, signOutGoogle, statusCodes } from '@/lib/google-auth';
 
@@ -23,9 +26,6 @@ const mmkvStorage = {
   removeItem: (key: string) => mmkv.delete(key),
 };
 const storage = createJSONStorage(() => mmkvStorage);
-
-const authDelay = (ms: number) =>
-  new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 // ─── Credit Store ──────────────────────────────────────────────────────────
 
@@ -54,22 +54,16 @@ export const useCreditStore = create<CreditState>()(
 
 // ─── Auth Store ────────────────────────────────────────────────────────────
 
-interface RegisteredAccount {
-  email: string;
-  password: string;
-  name: string;
-}
-
 export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   authError: string | null;
-  accounts: RegisteredAccount[];
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (email: string, password: string, name?: string) => Promise<boolean>;
+  login: (usernameOrEmail: string, password: string) => Promise<boolean>;
+  loginWithTokens: (tokens: AuthTokens) => Promise<boolean>;
+  register: (username: string, email: string, password: string, name?: string) => Promise<boolean>;
   loginWithOAuth: (provider: 'google' | 'apple') => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   clearAuthError: () => void;
   updateProfile: (patch: Partial<Pick<User, 'name' | 'bio' | 'location' | 'avatar'>>) => void;
 }
@@ -81,90 +75,74 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isLoading: false,
       authError: null,
-      accounts: [],
+
       clearAuthError: () => set({ authError: null }),
-      login: async (email, password) => {
-        set({ isLoading: true, authError: null });
-        await authDelay(450);
-        const normalized = email.trim().toLowerCase();
-        if (normalized === DEMO_EMAIL && password.trim() === DEMO_PASSWORD) {
-          const user = { ...mockCurrentUser, email: normalized };
-          set({ user, isAuthenticated: true, isLoading: false });
-          useCreditStore.getState().setBalance(user.credits);
+
+      loginWithTokens: async (tokens) => {
+        try {
+          tokenStorage.save(tokens);
+          const profile = await userService.getMyProfile();
+          const user: User = { ...userProfileToUser(profile) as User, membershipTier: 'curator', credits: 0 };
+          set({ user, isAuthenticated: true });
           return true;
-        }
-        const acc = get().accounts.find((a) => a.email === normalized);
-        if (!acc || acc.password !== password.trim()) {
-          set({ authError: 'Email hoặc mật khẩu không đúng.', isLoading: false });
+        } catch {
+          tokenStorage.clear();
           return false;
         }
-        const user: User = {
-          ...mockCurrentUser,
-          id: `user-${normalized}`,
-          email: normalized,
-          name: acc.name,
-          credits: 100,
-        };
-        set({ user, isAuthenticated: true, isLoading: false });
-        useCreditStore.getState().setBalance(user.credits);
-        return true;
       },
-      register: async (email, password, name) => {
-        const normalized = email.trim().toLowerCase();
-        const passwordTrim = password.trim();
-        const displayName =
-          name?.trim() ||
-          normalized.split('@')[0]?.replace(/[._-]/g, ' ') ||
-          'Người dùng';
-        if (passwordTrim.length < 8) {
-          set({ authError: 'Mật khẩu tối thiểu 8 ký tự.' });
-          return false;
-        }
-        if (normalized === DEMO_EMAIL) {
-          set({ authError: 'Email này dành cho tài khoản demo.' });
-          return false;
-        }
-        if (get().accounts.some((a) => a.email === normalized)) {
-          set({ authError: 'Email đã được đăng ký.' });
-          return false;
-        }
+
+      login: async (usernameOrEmail, password) => {
         set({ isLoading: true, authError: null });
-        await authDelay(450);
-        const acc: RegisteredAccount = { email: normalized, password: passwordTrim, name: displayName };
-        const user: User = {
-          ...mockCurrentUser,
-          id: `user-${normalized}`,
-          email: normalized,
-          name: displayName,
-          credits: 100,
-        };
-        set((s) => ({ accounts: [...s.accounts, acc], user, isAuthenticated: true, isLoading: false }));
-        useCreditStore.getState().setBalance(user.credits);
-        return true;
+        try {
+          const tokens = await authService.login(usernameOrEmail.trim(), password);
+          const ok = await get().loginWithTokens(tokens);
+          set({ isLoading: false });
+          return ok;
+        } catch (err: any) {
+          set({ authError: err.message ?? 'Đăng nhập thất bại.', isLoading: false });
+          return false;
+        }
       },
-      loginWithOAuth: async (provider) => {
+
+      register: async (username, email, password, name) => {
         set({ isLoading: true, authError: null });
-        await authDelay(500);
-        const user: User = {
-          ...mockCurrentUser,
-          id: `oauth-${provider}-${Date.now()}`,
-          name: provider === 'google' ? 'Google Curator' : 'Apple Curator',
-          email: provider === 'google' ? 'google.user@modami.app' : 'apple.user@modami.app',
-        };
-        set({ user, isAuthenticated: true, isLoading: false });
-        useCreditStore.getState().setBalance(user.credits);
+        try {
+          await authService.register(username.trim(), email.trim(), password, name?.trim());
+          const tokens = await authService.login(username.trim(), password);
+          const ok = await get().loginWithTokens(tokens);
+          set({ isLoading: false });
+          return ok;
+        } catch (err: any) {
+          set({ authError: err.message ?? 'Đăng ký thất bại.', isLoading: false });
+          return false;
+        }
       },
-      logout: () => {
-        useCreditStore.getState().setBalance(0);
-        set({ user: null, isAuthenticated: false, authError: null });
+
+      loginWithOAuth: async (_provider) => {
+        // OAuth social login qua Keycloak — cần WebView / deep link
+        // Hiện tại chưa hỗ trợ trên mobile, giữ placeholder
+        set({ authError: 'Social login chưa được hỗ trợ.' });
       },
+
+      logout: async () => {
+        const refreshToken = tokenStorage.getRefreshToken();
+        try {
+          if (refreshToken) await authService.logout(refreshToken);
+        } catch {
+          // Silent — vẫn clear local state dù server lỗi
+        } finally {
+          tokenStorage.clear();
+          useCreditStore.getState().setBalance(0);
+          set({ user: null, isAuthenticated: false, authError: null });
+        }
+      },
+
       updateProfile: (patch) => {
         set((s) => {
           if (!s.user) return s;
           const next: User = { ...s.user, ...patch };
-          const trimmedAvatar = patch.avatar?.trim();
           if (patch.avatar !== undefined) {
-            next.avatar = trimmedAvatar ? trimmedAvatar : undefined;
+            next.avatar = patch.avatar?.trim() || undefined;
           }
           return { user: next };
         });
@@ -173,7 +151,7 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'modami-auth-v2',
       storage,
-      partialize: (s) => ({ user: s.user, isAuthenticated: s.isAuthenticated, accounts: s.accounts }),
+      partialize: (s) => ({ user: s.user, isAuthenticated: s.isAuthenticated }),
     },
   ),
 );

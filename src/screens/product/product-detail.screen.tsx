@@ -2,10 +2,13 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, useWindowDimensions, Share } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChevronLeft, Heart, Share2, BookOpen } from 'lucide-react-native';
+import { useQueryClient } from '@tanstack/react-query';
 import type { RootStackScreenProps } from '@/navigation/navigation.type';
 import { useProductStore } from '@/store/app.store';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { formatPrice, toSlug } from '@/lib/utils.helper';
 import { COLORS } from '@/constants/app.constants';
+import { productKeys } from '@/hooks/queries/product.queries';
 import type { Product } from '@/types/app.type';
 
 import { useProductDetail } from './hooks/useProductDetail';
@@ -24,8 +27,17 @@ export function ProductDetailScreen({ navigation, route }: Props) {
   const { productId } = route.params;
   const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
+  const queryClient = useQueryClient();
   const toggleFavorite = useProductStore((s) => s.toggleFavorite);
   const isFav = useProductStore((s) => s.isFavorited(productId));
+  const requireAuth = useRequireAuth();
+
+  function navigateToProduct(p: Product) {
+    if (!queryClient.getQueryData(productKeys.detail(p.id))) {
+      queryClient.setQueryData(productKeys.detail(p.id), { data: p });
+    }
+    navigation.push('ProductDetail', { productId: p.id });
+  }
 
   const {
     product,
@@ -99,7 +111,7 @@ export function ProductDetailScreen({ navigation, route }: Props) {
             <Share2 size={18} color={COLORS.onSurface} strokeWidth={2} />
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => toggleFavorite(productId)}
+            onPress={() => requireAuth(() => toggleFavorite(productId), 'Đăng nhập để lưu sản phẩm yêu thích.')}
             className="w-10 h-10 rounded-full bg-surface/90 items-center justify-center"
             style={cardShadow}
           >
@@ -195,16 +207,19 @@ export function ProductDetailScreen({ navigation, route }: Props) {
               navigation.navigate('SellerDetail', { sellerId: product.sellerId })
             }
             onNavigateToConversation={() =>
-              navigation.navigate('Conversation', {
-                conversationId: `conv-${product.sellerId}`,
-                participantName: product.sellerName,
-              })
+              requireAuth(
+                () => navigation.navigate('Conversation', {
+                  conversationId: `conv-${product.sellerId}`,
+                  participantName: product.sellerName,
+                }),
+                'Đăng nhập để nhắn tin với người bán.',
+              )
             }
           />
 
           <SimilarProducts
             products={similarProducts}
-            onPress={(p: Product) => navigation.replace('ProductDetail', { productId: p.id })}
+            onPress={navigateToProduct}
             onViewAll={() => navigation.navigate('Main', { screen: 'Explore' })}
           />
         </View>
@@ -219,12 +234,15 @@ export function ProductDetailScreen({ navigation, route }: Props) {
           creditCost={product.creditCost}
           balance={balance}
           sellerName={product.sellerName}
-          onUnlock={handleUnlock}
+          onUnlock={() => requireAuth(handleUnlock, 'Đăng nhập để mở khoá thông tin người bán.')}
           onMessage={() =>
-            navigation.navigate('Conversation', {
-              conversationId: `conv-${product.sellerId}`,
-              participantName: product.sellerName,
-            })
+            requireAuth(
+              () => navigation.navigate('Conversation', {
+                conversationId: `conv-${product.sellerId}`,
+                participantName: product.sellerName,
+              }),
+              'Đăng nhập để nhắn tin với người bán.',
+            )
           }
         />
       </View>

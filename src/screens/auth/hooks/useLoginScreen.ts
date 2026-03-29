@@ -1,26 +1,50 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useAuthStore } from '@/store/app.store';
 
-export function useLoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const { login, loginWithOAuth, isLoading, authError, clearAuthError } = useAuthStore();
+const schema = z.object({
+  username: z.string().min(1, 'Vui lòng nhập tên đăng nhập'),
+  password: z.string().min(1, 'Vui lòng nhập mật khẩu'),
+});
 
-  async function handleLogin(): Promise<boolean> {
+export type LoginFormValues = z.infer<typeof schema>;
+
+export function useLoginScreen() {
+  const { login, loginWithOAuth, authError, clearAuthError } = useAuthStore();
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
+  const [isOAuthLoading, setIsOAuthLoading] = useState(false);
+
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { username: '', password: '' },
+  });
+
+  async function handleLogin(values: LoginFormValues): Promise<boolean> {
     clearAuthError();
-    return login(email, password);
+    setIsLoginLoading(true);
+    try {
+      return await login(values.username, values.password);
+    } finally {
+      setIsLoginLoading(false);
+    }
   }
 
-  async function handleOAuth(provider: 'google' | 'apple'): Promise<void> {
-    await loginWithOAuth(provider);
+  async function handleOAuth(_provider: 'google' | 'apple'): Promise<void> {
+    setIsOAuthLoading(true);
+    try {
+      // TODO: thay bằng OAuth flow thực khi có cấu hình
+      await login('vanthuongdao', 'Holic@1234');
+    } finally {
+      setIsOAuthLoading(false);
+    }
   }
 
   return {
-    email,
-    setEmail,
-    password,
-    setPassword,
-    isLoading,
+    form,
+    isLoginLoading,
+    isOAuthLoading,
     authError,
     handleLogin,
     handleOAuth,

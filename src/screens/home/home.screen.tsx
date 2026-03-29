@@ -34,7 +34,9 @@ export function HomeScreen({ navigation }: Props) {
   const [trendGridRowWidth, setTrendGridRowWidth] = useState(0);
 
   const navigateToProduct = useCallback((product: Product) => {
-    queryClient.setQueryData(productKeys.detail(product.id), { data: product });
+    if (!queryClient.getQueryData(productKeys.detail(product.id))) {
+      queryClient.setQueryData(productKeys.detail(product.id), { data: product });
+    }
     navigation.navigate('ProductDetail', { productId: product.id });
   }, [queryClient, navigation]);
   const { width: windowWidth } = useWindowDimensions();

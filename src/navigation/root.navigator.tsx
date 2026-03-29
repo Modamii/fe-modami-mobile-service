@@ -21,6 +21,7 @@ import { MyListingsScreen } from '@/screens/my-listings/my-listings.screen';
 import { ListingDetailScreen } from '@/screens/my-listings/listing-detail.screen';
 import { LoginScreen } from '@/screens/auth/login.screen';
 import { RegisterScreen } from '@/screens/auth/register.screen';
+import { ForgotPasswordScreen } from '@/screens/auth/forgot-password.screen';
 import { AuthPromptScreen } from '@/screens/auth/auth-prompt.screen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -117,6 +118,7 @@ export function RootNavigator() {
               presentation: 'transparentModal',
               animation: 'slide_from_bottom',
               headerShown: false,
+              contentStyle: { backgroundColor: 'transparent' },
             }}
           />
           <Stack.Screen
@@ -131,6 +133,15 @@ export function RootNavigator() {
           <Stack.Screen
             name="Register"
             component={RegisterScreen}
+            options={{
+              presentation: 'modal',
+              animation: 'slide_from_bottom',
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="ForgotPassword"
+            component={ForgotPasswordScreen}
             options={{
               presentation: 'modal',
               animation: 'slide_from_bottom',

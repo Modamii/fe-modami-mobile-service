@@ -7,12 +7,12 @@ import {
   Platform,
   TouchableOpacity,
 } from 'react-native';
+import { Controller } from 'react-hook-form';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { XMarkIcon } from 'react-native-heroicons/outline';
 import type { RootStackScreenProps } from '@/navigation/navigation.type';
 import { Button } from '@/components/ui/button.component';
 import { Input } from '@/components/ui/input.component';
-import { InputPassword } from '@/components/ui/input-password.component';
 import { COLORS } from '@/constants/app.constants';
 import { useLoginScreen } from './hooks/useLoginScreen';
 import { AuthBrand } from './components/auth-brand.component';
@@ -22,23 +22,20 @@ type Props = RootStackScreenProps<'Login'>;
 
 export function LoginScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
-  const {
-    email,
-    setEmail,
-    password,
-    setPassword,
-    isLoading,
-    authError,
-    handleLogin,
-    handleOAuth,
-  } = useLoginScreen();
+  const { form, isLoginLoading, isOAuthLoading, authError, handleLogin, handleOAuth } = useLoginScreen();
+  const isAnyLoading = isLoginLoading || isOAuthLoading;
+  const { control, handleSubmit, formState: { errors } } = form;
+
+  const onSubmit = handleSubmit(async (values) => {
+    const ok = await handleLogin(values);
+    if (ok) navigation.goBack();
+  });
 
   return (
     <KeyboardAvoidingView
       className="flex-1 bg-background"
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      {/* Close button */}
       <TouchableOpacity
         onPress={() => navigation.goBack()}
         hitSlop={12}
@@ -57,34 +54,58 @@ export function LoginScreen({ navigation }: Props) {
         </View>
 
         <View className="gap-4">
-          <Input
-            label="Email"
-            value={email}
-            onChangeText={setEmail}
-            placeholder="demo@modami.app"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoComplete="email"
+          <Controller
+            control={control}
+            name="username"
+            render={({ field: { onChange, onBlur, value, ref } }) => (
+              <Input
+                ref={ref}
+                label="Tên đăng nhập"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                placeholder="Nhập tên đăng nhập"
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="username"
+                error={errors.username?.message}
+                returnKeyType="next"
+              />
+            )}
           />
-          <InputPassword
-            label="Mật khẩu"
-            value={password}
-            onChangeText={setPassword}
-            placeholder="Nhập mật khẩu"
+
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { onChange, onBlur, value, ref } }) => (
+              <Input
+                ref={ref}
+                label="Mật khẩu"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                placeholder="Nhập mật khẩu"
+                secureTextEntry
+                error={errors.password?.message}
+                returnKeyType="done"
+                onSubmitEditing={onSubmit}
+              />
+            )}
           />
 
           {authError && (
             <Text className="text-sm text-red-500 text-center">{authError}</Text>
           )}
 
-          <Button
-            onPress={async () => {
-              const ok = await handleLogin();
-              if (ok) navigation.goBack();
-            }}
-            loading={isLoading}
-            className="mt-2"
+          <TouchableOpacity
+            onPress={() => navigation.navigate('ForgotPassword')}
+            className="self-end"
+            hitSlop={8}
           >
+            <Text className="text-sm text-primary font-medium">Quên mật khẩu?</Text>
+          </TouchableOpacity>
+
+          <Button onPress={onSubmit} loading={isLoginLoading} disabled={isAnyLoading} className="mt-2">
             Đăng nhập
           </Button>
 
@@ -96,7 +117,8 @@ export function LoginScreen({ navigation }: Props) {
               await handleOAuth('google');
               navigation.goBack();
             }}
-            loading={isLoading}
+            loading={isOAuthLoading}
+            disabled={isAnyLoading}
           >
             Tiếp tục với Google
           </Button>
@@ -108,10 +130,6 @@ export function LoginScreen({ navigation }: Props) {
             <Text className="text-sm font-semibold text-primary">Đăng ký</Text>
           </TouchableOpacity>
         </View>
-
-        <Text className="text-xs text-center text-secondary/60 mt-6">
-          Demo: demo@modami.app / demo1234
-        </Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
