@@ -21,7 +21,7 @@ import {
   mockTrendSpotlights,
 } from '@/data/mock-trends-page.mock';
 import { COLORS } from '@/constants/app.constants';
-import type { TrendBlog } from '@/types/app.type';
+import { TrendListRow } from './components/trend-list-row.component';
 
 type Props = RootStackScreenProps<'TrendsList'>;
 
@@ -222,32 +222,5 @@ export function TrendsListScreen({ navigation }: Props) {
         </View>
       </TouchableOpacity>
     </ScrollView>
-  );
-}
-
-function TrendListRow({ item, onPress }: { item: TrendBlog; onPress: () => void }) {
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      activeOpacity={0.85}
-      className="flex-row gap-3 bg-surface rounded-2xl p-3 overflow-hidden"
-      style={cardShadow}
-    >
-      <Image source={{ uri: item.image }} className="w-[88px] h-[88px] rounded-xl bg-surface-container" resizeMode="cover" />
-      <View className="flex-1 justify-center">
-        <Text className="text-[10px] font-bold text-primary uppercase tracking-wider">{item.topic}</Text>
-        <Text className="text-sm font-bold text-on-surface mt-0.5" numberOfLines={2}>
-          {item.title}
-        </Text>
-        <Text className="text-xs text-secondary mt-1" numberOfLines={2}>
-          {item.excerpt}
-        </Text>
-        {item.author ? (
-          <Text className="text-[10px] text-secondary mt-1.5 font-medium" numberOfLines={1}>
-            {item.author}
-          </Text>
-        ) : null}
-      </View>
-    </TouchableOpacity>
   );
 }

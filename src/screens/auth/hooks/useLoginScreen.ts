@@ -6,13 +6,13 @@ export function useLoginScreen() {
   const [password, setPassword] = useState('');
   const { login, loginWithOAuth, isLoading, authError, clearAuthError } = useAuthStore();
 
-  async function handleLogin() {
+  async function handleLogin(): Promise<boolean> {
     clearAuthError();
-    await login(email, password);
+    return login(email, password);
   }
 
-  function handleOAuth(provider: 'google' | 'apple') {
-    loginWithOAuth(provider);
+  async function handleOAuth(provider: 'google' | 'apple'): Promise<void> {
+    await loginWithOAuth(provider);
   }
 
   return {

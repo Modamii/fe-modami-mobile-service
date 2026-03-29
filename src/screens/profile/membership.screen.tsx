@@ -4,33 +4,17 @@ import { CheckIcon } from 'react-native-heroicons/solid';
 import type { RootStackScreenProps } from '@/navigation/navigation.type';
 import { useAuthStore, useMembershipStore } from '@/store/app.store';
 import { COLORS } from '@/constants/app.constants';
-import type { PaidMembershipTierId, MembershipBillingCycle } from '@/types/app.type';
+import type { MembershipBillingCycle } from '@/types/app.type';
+import { MEMBERSHIP_PLANS } from './constants/membership.constants';
 
 type Props = RootStackScreenProps<'Membership'>;
 
-const plans = [
-  {
-    id: 'style' as PaidMembershipTierId,
-    label: 'Style',
-    price: { monthly: 99000, yearly: 990000 },
-    perks: ['50 credits/tháng', 'Ưu tiên hiển thị sản phẩm', 'Huy hiệu Style Curator'],
-  },
-  {
-    id: 'elite' as PaidMembershipTierId,
-    label: 'Elite',
-    price: { monthly: 249000, yearly: 2490000 },
-    perks: ['200 credits/tháng', 'Ưu tiên tìm kiếm', 'Huy hiệu Elite', 'Hỗ trợ ưu tiên'],
-  },
-];
+const BILLING_CYCLES: MembershipBillingCycle[] = ['monthly', 'yearly'];
 
 export function MembershipScreen(_props: Props) {
   const user = useAuthStore((s) => s.user);
   const { tier, subscribe } = useMembershipStore();
   const [billing, setBilling] = React.useState<MembershipBillingCycle>('monthly');
-
-  const handleSubscribe = (planId: PaidMembershipTierId) => {
-    subscribe(planId, billing);
-  };
 
   return (
     <ScrollView className="flex-1 bg-background" contentContainerClassName="p-5 gap-4">
@@ -40,7 +24,7 @@ export function MembershipScreen(_props: Props) {
 
       {/* Billing toggle */}
       <View className="flex-row bg-surface-container rounded-xl p-1">
-        {(['monthly', 'yearly'] as MembershipBillingCycle[]).map((cycle) => (
+        {BILLING_CYCLES.map((cycle) => (
           <TouchableOpacity
             key={cycle}
             onPress={() => setBilling(cycle)}
@@ -57,7 +41,7 @@ export function MembershipScreen(_props: Props) {
       </View>
 
       {/* Plan cards */}
-      {plans.map((plan) => {
+      {MEMBERSHIP_PLANS.map((plan) => {
         const isActive = tier === plan.id;
         return (
           <View
@@ -89,7 +73,7 @@ export function MembershipScreen(_props: Props) {
             </View>
             {!isActive && (
               <TouchableOpacity
-                onPress={() => handleSubscribe(plan.id)}
+                onPress={() => subscribe(plan.id, billing)}
                 className="bg-primary rounded-xl py-3 items-center"
               >
                 <Text className="text-white font-semibold">Đăng ký {plan.label}</Text>

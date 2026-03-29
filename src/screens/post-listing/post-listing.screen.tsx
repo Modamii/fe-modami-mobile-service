@@ -3,53 +3,59 @@ import {
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  TouchableOpacity,
 } from 'react-native';
-import { Controller } from 'react-hook-form';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CheckCircleIcon } from 'react-native-heroicons/solid';
 import type { MainTabScreenProps } from '@/navigation/navigation.type';
 import { Button } from '@/components/ui/button.component';
-import { Input } from '@/components/ui/input.component';
-import { CATEGORIES, CONDITIONS, COLORS } from '@/constants/app.constants';
+import { useAuthStore } from '@/store/app.store';
 import { usePostListingScreen } from './hooks/usePostListingScreen';
 import { PhotoGrid } from './components/photo-grid.component';
 import { SectionTitle } from './components/section-title.component';
-import { ChipPicker } from './components/chip-picker.component';
+import { BasicInfoSection } from './components/basic-info-section.component';
+import { CategorySection } from './components/category-section.component';
+import { ConditionSection } from './components/condition-section.component';
+import { SizeSection } from './components/size-section.component';
+import { DescriptionSection } from './components/description-section.component';
 
 type Props = MainTabScreenProps<'PostListing'>;
 
-const CONDITION_LABELS: Record<string, string> = {
-  new: 'Mới — chưa dùng, còn tag',
-  'like-new': 'Như mới — dùng 1-2 lần',
-  good: 'Tốt — dùng vài lần, không lỗi',
-  fair: 'Khá tốt — có dấu hiệu dùng nhỏ',
-};
-
-const CONDITION_NAMES: Record<string, string> = {
-  new: 'Mới',
-  'like-new': 'Như mới',
-  good: 'Tốt',
-  fair: 'Khá tốt',
-};
-
-const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'One Size', 'Khác'];
-
-export function PostListingScreen(_props: Props) {
-  const {
-    form,
-    photos,
-    handleAddPhoto,
-    handleRemovePhoto,
-    handleReorderPhotos,
-    onSubmit,
-  } = usePostListingScreen();
-
+export function PostListingScreen({ navigation }: Props) {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const { form, photos, handleAddPhoto, handleRemovePhoto, handleReorderPhotos, onSubmit } = usePostListingScreen();
   const { control, formState: { errors } } = form;
   const scrollRef = useRef<ScrollView>(null);
   const [scrollEnabled, setScrollEnabled] = useState(true);
+
+  if (!isAuthenticated) {
+    return (
+      <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+        <View className="px-5 pt-4 pb-2">
+          <Text className="text-2xl font-black text-on-surface tracking-tight">Đăng bán</Text>
+        </View>
+        <View className="flex-1 items-center justify-center px-8 gap-5">
+          <View className="w-20 h-20 rounded-full bg-primary/10 items-center justify-center">
+            <Text className="text-4xl">📦</Text>
+          </View>
+          <View className="items-center gap-2">
+            <Text className="text-lg font-bold text-on-surface text-center">Cần đăng nhập</Text>
+            <Text className="text-sm text-secondary text-center leading-5">
+              Đăng nhập để đăng bán sản phẩm và quản lý tin đăng của bạn.
+            </Text>
+          </View>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Login')}
+            className="bg-primary rounded-2xl px-8 py-4 w-full items-center"
+            activeOpacity={0.85}
+          >
+            <Text className="text-white font-bold text-base">Đăng nhập ngay</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -64,7 +70,6 @@ export function PostListingScreen(_props: Props) {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Header */}
           <View className="px-5 pt-4 pb-2">
             <Text className="text-2xl font-black text-on-surface tracking-tight">
               Đăng bán
@@ -74,7 +79,6 @@ export function PostListingScreen(_props: Props) {
             </Text>
           </View>
 
-          {/* Photos */}
           <View className="px-5 pt-4 pb-2">
             <SectionTitle>Ảnh sản phẩm</SectionTitle>
             <PhotoGrid
@@ -87,172 +91,12 @@ export function PostListingScreen(_props: Props) {
             />
           </View>
 
-          {/* Basic info */}
-          <View className="px-5 pt-4 gap-3">
-            <SectionTitle>Thông tin cơ bản</SectionTitle>
+          <BasicInfoSection control={control} errors={errors} />
+          <CategorySection control={control} errors={errors} />
+          <ConditionSection control={control} errors={errors} />
+          <SizeSection control={control} />
+          <DescriptionSection control={control} />
 
-            <Controller
-              control={control}
-              name="title"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  label="Tên sản phẩm *"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  placeholder="VD: Áo blazer vintage xanh navy"
-                  error={errors.title?.message}
-                />
-              )}
-            />
-
-            <View className="flex-row gap-3">
-              <View className="flex-1">
-                <Controller
-                  control={control}
-                  name="price"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <Input
-                      label="Giá bán (₫) *"
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      placeholder="350.000"
-                      keyboardType="numeric"
-                      error={errors.price?.message}
-                    />
-                  )}
-                />
-              </View>
-              <View className="flex-1">
-                <Controller
-                  control={control}
-                  name="brand"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <Input
-                      label="Thương hiệu"
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      placeholder="Zara, H&M..."
-                    />
-                  )}
-                />
-              </View>
-            </View>
-          </View>
-
-          {/* Category */}
-          <View className="px-5 pt-4">
-            <SectionTitle>Danh mục *</SectionTitle>
-            <Controller
-              control={control}
-              name="category"
-              render={({ field: { onChange, value } }) => (
-                <View className="gap-1.5">
-                  <ChipPicker
-                    options={CATEGORIES}
-                    selected={value || null}
-                    onSelect={onChange}
-                  />
-                  {errors.category && (
-                    <Text className="text-xs text-red-500">{errors.category.message}</Text>
-                  )}
-                </View>
-              )}
-            />
-          </View>
-
-          {/* Condition */}
-          <View className="px-5 pt-4">
-            <SectionTitle>Tình trạng *</SectionTitle>
-            <Controller
-              control={control}
-              name="condition"
-              render={({ field: { onChange, value } }) => (
-                <View className="gap-2">
-                  {CONDITIONS.map((cond) => {
-                    const isSelected = value === cond;
-                    return (
-                      <TouchableOpacity
-                        key={cond}
-                        onPress={() => onChange(cond)}
-                        className={`flex-row items-center gap-3 rounded-xl px-4 py-3 ${isSelected ? 'bg-primary/10' : 'bg-surface'}`}
-                        style={
-                          isSelected
-                            ? undefined
-                            : {
-                                shadowColor: COLORS.onSurface,
-                                shadowOffset: { width: 0, height: 1 },
-                                shadowOpacity: 0.04,
-                                shadowRadius: 4,
-                                elevation: 1,
-                              }
-                        }
-                      >
-                        <CheckCircleIcon
-                          size={20}
-                          color={isSelected ? COLORS.primary : COLORS.outlineVariant}
-                        />
-                        <View className="flex-1">
-                          <Text
-                            className={`text-sm font-semibold ${isSelected ? 'text-primary' : 'text-on-surface'}`}
-                          >
-                            {CONDITION_NAMES[cond] ?? cond}
-                          </Text>
-                          <Text className="text-xs text-secondary mt-0.5">
-                            {CONDITION_LABELS[cond]}
-                          </Text>
-                        </View>
-                      </TouchableOpacity>
-                    );
-                  })}
-                  {errors.condition && (
-                    <Text className="text-xs text-red-500">{errors.condition.message}</Text>
-                  )}
-                </View>
-              )}
-            />
-          </View>
-
-          {/* Size */}
-          <View className="px-5 pt-4">
-            <SectionTitle>Kích cỡ</SectionTitle>
-            <Controller
-              control={control}
-              name="size"
-              render={({ field: { onChange, value } }) => (
-                <ChipPicker
-                  options={SIZES}
-                  selected={value || null}
-                  onSelect={onChange}
-                />
-              )}
-            />
-          </View>
-
-          {/* Description */}
-          <View className="px-5 pt-4 pb-4">
-            <SectionTitle>Mô tả thêm</SectionTitle>
-            <Controller
-              control={control}
-              name="description"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  label=""
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  placeholder="Mô tả chi tiết: xuất xứ, lý do bán, ghi chú kích thước thực tế..."
-                  multiline
-                  numberOfLines={4}
-                  style={{ height: 100, textAlignVertical: 'top' }}
-                />
-              )}
-            />
-          </View>
-
-          {/* Submit */}
           <View className="px-5 pb-8">
             <Button onPress={onSubmit}>Đăng bán ngay</Button>
           </View>

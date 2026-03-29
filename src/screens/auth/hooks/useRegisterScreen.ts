@@ -7,9 +7,9 @@ export function useRegisterScreen() {
   const [password, setPassword] = useState('');
   const { register, isLoading, authError, clearAuthError } = useAuthStore();
 
-  async function handleRegister() {
+  async function handleRegister(): Promise<boolean> {
     clearAuthError();
-    await register(email, password, name);
+    return register(email, password, name);
   }
 
   return {

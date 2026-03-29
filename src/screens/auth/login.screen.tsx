@@ -7,16 +7,21 @@ import {
   Platform,
   TouchableOpacity,
 } from 'react-native';
-import type { AuthStackScreenProps } from '@/navigation/navigation.type';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { XMarkIcon } from 'react-native-heroicons/outline';
+import type { RootStackScreenProps } from '@/navigation/navigation.type';
 import { Button } from '@/components/ui/button.component';
 import { Input } from '@/components/ui/input.component';
+import { InputPassword } from '@/components/ui/input-password.component';
+import { COLORS } from '@/constants/app.constants';
 import { useLoginScreen } from './hooks/useLoginScreen';
 import { AuthBrand } from './components/auth-brand.component';
 import { AuthDivider } from './components/auth-divider.component';
 
-type Props = AuthStackScreenProps<'Login'>;
+type Props = RootStackScreenProps<'Login'>;
 
 export function LoginScreen({ navigation }: Props) {
+  const insets = useSafeAreaInsets();
   const {
     email,
     setEmail,
@@ -33,6 +38,15 @@ export function LoginScreen({ navigation }: Props) {
       className="flex-1 bg-background"
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
+      {/* Close button */}
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        hitSlop={12}
+        style={{ position: 'absolute', top: insets.top + 12, right: 20, zIndex: 10 }}
+      >
+        <XMarkIcon size={24} color={COLORS.secondary} />
+      </TouchableOpacity>
+
       <ScrollView
         className="flex-1"
         contentContainerClassName="flex-grow justify-center px-6 py-12"
@@ -52,19 +66,25 @@ export function LoginScreen({ navigation }: Props) {
             autoCapitalize="none"
             autoComplete="email"
           />
-          <Input
+          <InputPassword
             label="Mật khẩu"
             value={password}
             onChangeText={setPassword}
             placeholder="Nhập mật khẩu"
-            secureTextEntry
           />
 
           {authError && (
             <Text className="text-sm text-red-500 text-center">{authError}</Text>
           )}
 
-          <Button onPress={handleLogin} loading={isLoading} className="mt-2">
+          <Button
+            onPress={async () => {
+              const ok = await handleLogin();
+              if (ok) navigation.goBack();
+            }}
+            loading={isLoading}
+            className="mt-2"
+          >
             Đăng nhập
           </Button>
 
@@ -72,7 +92,10 @@ export function LoginScreen({ navigation }: Props) {
 
           <Button
             variant="secondary"
-            onPress={() => handleOAuth('google')}
+            onPress={async () => {
+              await handleOAuth('google');
+              navigation.goBack();
+            }}
             loading={isLoading}
           >
             Tiếp tục với Google

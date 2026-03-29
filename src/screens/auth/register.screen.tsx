@@ -8,14 +8,15 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { ChevronLeftIcon } from 'react-native-heroicons/outline';
-import type { AuthStackScreenProps } from '@/navigation/navigation.type';
+import type { RootStackScreenProps } from '@/navigation/navigation.type';
 import { Button } from '@/components/ui/button.component';
 import { Input } from '@/components/ui/input.component';
+import { InputPassword } from '@/components/ui/input-password.component';
 import { COLORS } from '@/constants/app.constants';
 import { useRegisterScreen } from './hooks/useRegisterScreen';
 import { AuthBrand } from './components/auth-brand.component';
 
-type Props = AuthStackScreenProps<'Register'>;
+type Props = RootStackScreenProps<'Register'>;
 
 export function RegisterScreen({ navigation }: Props) {
   const {
@@ -75,19 +76,25 @@ export function RegisterScreen({ navigation }: Props) {
             keyboardType="email-address"
             autoCapitalize="none"
           />
-          <Input
+          <InputPassword
             label="Mật khẩu"
             value={password}
             onChangeText={setPassword}
             placeholder="Tối thiểu 8 ký tự"
-            secureTextEntry
           />
 
           {authError && (
             <Text className="text-sm text-red-500 text-center">{authError}</Text>
           )}
 
-          <Button onPress={handleRegister} loading={isLoading} className="mt-2">
+          <Button
+            onPress={async () => {
+              const ok = await handleRegister();
+              if (ok) navigation.goBack();
+            }}
+            loading={isLoading}
+            className="mt-2"
+          >
             Đăng ký
           </Button>
         </View>

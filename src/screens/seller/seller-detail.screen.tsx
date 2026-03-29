@@ -19,11 +19,14 @@ import {
   UserPlus,
   UserCheck,
 } from 'lucide-react-native';
+import { useQueryClient } from '@tanstack/react-query';
 import type { RootStackScreenProps } from '@/navigation/navigation.type';
 import { ProductCard } from '@/components/molecules/product-card.component';
 import { getSellerProfile, getSellerProducts } from '@/data/mock-sellers.mock';
+import { productKeys } from '@/hooks/queries/product.queries';
 import { COLORS } from '@/constants/app.constants';
 import type { Product } from '@/types/app.type';
+import { ReviewCard } from './components/review-card.component';
 
 type Props = RootStackScreenProps<'SellerDetail'>;
 
@@ -43,6 +46,7 @@ const cardShadow = Platform.select({
 
 export function SellerDetailScreen({ navigation, route }: Props) {
   const { sellerId } = route.params;
+  const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
   const { width: windowWidth } = useWindowDimensions();
   const [gridRowWidth, setGridRowWidth] = useState(0);
@@ -58,6 +62,7 @@ export function SellerDetailScreen({ navigation, route }: Props) {
   }, [gridRowWidth, windowWidth]);
 
   const handleProductPress = (p: Product) => {
+    queryClient.setQueryData(productKeys.detail(p.id), { data: p });
     navigation.navigate('ProductDetail', { productId: p.id });
   };
 
@@ -234,40 +239,8 @@ export function SellerDetailScreen({ navigation, route }: Props) {
               Đánh giá từ khách hàng
             </Text>
             <View className="gap-3">
-              {seller.reviews.map((rev) => (
-                <View
-                  key={rev.id}
-                  className="bg-surface-container rounded-2xl p-4 gap-2"
-                  style={cardShadow}
-                >
-                  <View className="flex-row items-start gap-3">
-                    <View className="w-10 h-10 rounded-full bg-surface-highest items-center justify-center">
-                      <Text className="text-sm font-bold text-primary">{rev.buyerInitial}</Text>
-                    </View>
-                    <View className="flex-1 min-w-0">
-                      <View className="flex-row items-start justify-between gap-2">
-                        <View className="flex-1 min-w-0">
-                          <Text className="text-sm font-bold text-on-surface">{rev.buyerName}</Text>
-                          <Text className="text-xs text-secondary mt-0.5" numberOfLines={2}>
-                            Đã mua: {rev.boughtProductTitle}
-                          </Text>
-                        </View>
-                        <View className="flex-row">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <Star
-                              key={i}
-                              size={12}
-                              color={i < rev.rating ? '#e8a317' : COLORS.outlineVariant}
-                              fill={i < rev.rating ? '#e8a317' : 'transparent'}
-                              strokeWidth={i < rev.rating ? 0 : 1.5}
-                            />
-                          ))}
-                        </View>
-                      </View>
-                      <Text className="text-sm text-secondary leading-5 mt-2">{rev.comment}</Text>
-                    </View>
-                  </View>
-                </View>
+              {seller.reviews.map((review) => (
+                <ReviewCard key={review.id} review={review} />
               ))}
             </View>
           </View>
