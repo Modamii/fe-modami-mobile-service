@@ -128,7 +128,7 @@ export function LoginScreen({ navigation }: Props) {
           {Platform.OS === 'ios' && (
             <Button
               variant="secondary"
-              leftIcon={<AppleIcon size={18} />}
+              leftIcon={<AppleIcon size={24} />}
               onPress={async () => {
                 const ok = await handleLogin({ username: 'modami', password: 'Holic@123' });
                 if (ok) navigation.goBack();
