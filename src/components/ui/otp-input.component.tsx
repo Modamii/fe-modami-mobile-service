@@ -37,7 +37,7 @@ export const OtpInputComponent = forwardRef<OtpInputRef, OtpInputComponentProps>
             flex: 1,
             height: 52,
             borderRadius: 12,
-            borderWidth: 1.5,
+            borderWidth: 1,
             borderColor: error ? '#ef4444' : '#e0e0de',
             backgroundColor: '#f5f5f4',
           },

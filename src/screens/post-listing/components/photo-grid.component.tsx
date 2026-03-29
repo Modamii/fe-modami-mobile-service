@@ -164,7 +164,7 @@ function DashedEmptyCell({ size, slotNumber }: { size: number; slotNumber: numbe
           ry={r}
           fill={COLORS.surfaceContainer}
           stroke={COLORS.outlineVariant}
-          strokeWidth={1.5}
+          strokeWidth={1}
           strokeDasharray="5,4"
         />
       </Svg>
@@ -322,7 +322,7 @@ export function PhotoGrid({
                 ry={12}
                 fill={COLORS.surface}
                 stroke={COLORS.outlineVariant}
-                strokeWidth={1.5}
+                strokeWidth={1}
                 strokeDasharray="5,4"
               />
             </Svg>

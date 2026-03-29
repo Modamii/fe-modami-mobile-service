@@ -230,7 +230,7 @@ export const FilterBottomSheet = forwardRef<BottomSheet, FilterBottomSheetProps>
                 flex: 1,
                 height: 48,
                 borderRadius: 24,
-                borderWidth: 1.5,
+                borderWidth: 1,
                 borderColor: COLORS.primary,
                 alignItems: 'center',
                 justifyContent: 'center',
