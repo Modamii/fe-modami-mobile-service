@@ -26,7 +26,6 @@ export function RegisterScreen({ navigation }: Props) {
     setStep,
     isLoading,
     apiError,
-    otp,
     setOtp,
     otpError,
     otpRef,

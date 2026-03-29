@@ -40,10 +40,12 @@ export const authService = {
     username: string,
     password: string,
     firstName?: string,
+    lastName?: string,
   ): Promise<AuthTokens> {
     const res = await axiosClient.post(`${BASE}/auth/otp/verify`, {
       email, otp, purpose: 'register', username, password,
       ...(firstName && { first_name: firstName }),
+      ...(lastName && { last_name: lastName }),
     });
     return res as unknown as AuthTokens;
   },

@@ -20,14 +20,16 @@ const schema = z.object({
 export type RegisterFormValues = z.infer<typeof schema>;
 
 export function useRegisterScreen() {
-  const loginWithTokens = useAuthStore((s) => s.loginWithTokens);
+  const loginWithTokens = useAuthStore(s => s.loginWithTokens);
 
   const [step, setStep] = useState<1 | 2>(1);
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState('');
   const [otp, setOtp] = useState('');
   const [otpError, setOtpError] = useState(false);
-  const [pendingValues, setPendingValues] = useState<RegisterFormValues | null>(null);
+  const [pendingValues, setPendingValues] = useState<RegisterFormValues | null>(
+    null,
+  );
   const otpRef = useRef<OtpInputRef>(null);
 
   const form = useForm<RegisterFormValues>({
@@ -65,7 +67,8 @@ export function useRegisterScreen() {
         otp,
         pendingValues.username,
         pendingValues.password,
-        pendingValues.name,
+        pendingValues.name.split(' ')[0] ?? '',
+        pendingValues.name.split(' ')[1] ?? '',
       );
       return await loginWithTokens(tokens);
     } catch (err: any) {
