@@ -8,8 +8,10 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { BuildingStorefrontIcon } from 'react-native-heroicons/outline';
 import type { MainTabScreenProps } from '@/navigation/navigation.type';
 import { Button } from '@/components/ui/button.component';
+import { COLORS } from '@/constants/app.constants';
 import { useAuthStore } from '@/store/app.store';
 import { usePostListingScreen } from './hooks/usePostListingScreen';
 import { PhotoGrid } from './components/photo-grid.component';
@@ -39,7 +41,7 @@ export function PostListingScreen({ navigation }: Props) {
         </View>
         <View className="flex-1 items-center justify-center px-8 gap-5">
           <View className="w-20 h-20 rounded-full bg-primary/10 items-center justify-center">
-            <Text className="text-4xl">📦</Text>
+            <BuildingStorefrontIcon size={40} color={COLORS.primary} strokeWidth={1.5} />
           </View>
           <View className="items-center gap-2">
             <Text className="text-lg font-bold text-on-surface text-center">Cần đăng nhập</Text>

@@ -12,6 +12,7 @@ import {
   BookmarkIcon,
   ClipboardDocumentListIcon,
   ShoppingBagIcon,
+  UserIcon,
 } from 'react-native-heroicons/outline';
 import { useProductStore } from '@/store/app.store';
 import type { MainTabScreenProps } from '@/navigation/navigation.type';
@@ -34,7 +35,7 @@ function GuestProfileView({ navigation }: Pick<Props, 'navigation'>) {
       </View>
       <View className="flex-1 items-center justify-center px-8 gap-5">
         <View className="w-20 h-20 rounded-full bg-primary/10 items-center justify-center">
-          <Text className="text-4xl">👤</Text>
+          <UserIcon size={40} color={COLORS.primary} strokeWidth={1.5} />
         </View>
         <View className="items-center gap-2">
           <Text className="text-lg font-bold text-on-surface text-center">Chưa đăng nhập</Text>

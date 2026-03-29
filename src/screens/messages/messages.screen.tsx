@@ -7,6 +7,7 @@ import { useConversations } from '@/hooks/queries/conversation.queries';
 import { COLORS } from '@/constants/app.constants';
 import { ConversationItem } from './components/conversation-item.component';
 import { MessagesScreenSkeleton } from './components/messages-skeleton.component';
+import { MessageCircleIcon } from 'lucide-react-native';
 
 type Props = MainTabScreenProps<'Messages'>;
 
@@ -28,7 +29,7 @@ export function MessagesScreen({ navigation }: Props) {
         </View>
         <View className="flex-1 items-center justify-center px-8 gap-5">
           <View className="w-20 h-20 rounded-full bg-primary/10 items-center justify-center">
-            <Text className="text-4xl">💬</Text>
+            <MessageCircleIcon size={40} color={COLORS.primary} strokeWidth={1.5} />
           </View>
           <View className="items-center gap-2">
             <Text className="text-lg font-bold text-on-surface text-center">Cần đăng nhập</Text>

@@ -31,7 +31,7 @@ export function GoogleIcon({ size = 20 }: { size?: number }) {
   );
 }
 
-export function AppleIcon({ size = 20, color = '#000' }: { size?: number; color?: string }) {
+export function AppleIcon({ size = 24, color = '#000' }: { size?: number; color?: string }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
       <Path

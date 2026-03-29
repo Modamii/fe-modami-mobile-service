@@ -5,6 +5,7 @@ import { XMarkIcon } from 'react-native-heroicons/outline';
 import type { RootStackScreenProps } from '@/navigation/navigation.type';
 import { useAuthStore } from '@/store/app.store';
 import { COLORS } from '@/constants/app.constants';
+import { LockIcon } from 'lucide-react-native';
 
 type Props = RootStackScreenProps<'AuthPrompt'>;
 
@@ -41,7 +42,7 @@ export function AuthPromptScreen({ navigation, route }: Props) {
         {/* Icon */}
         <View className="items-center mt-4 mb-5">
           <View className="w-16 h-16 rounded-full bg-primary/10 items-center justify-center">
-            <Text className="text-3xl">🔑</Text>
+            <LockIcon size={28} color={COLORS.primary} strokeWidth={1.5} />
           </View>
         </View>
 
