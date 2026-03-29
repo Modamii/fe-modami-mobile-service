@@ -12,6 +12,7 @@ interface ExploreSearchBarProps {
   onChangeText: (text: string) => void;
   onClear: () => void;
   hasActiveFilter: boolean;
+  onFilterPress: () => void;
 }
 
 export function ExploreSearchBar({
@@ -19,6 +20,7 @@ export function ExploreSearchBar({
   onChangeText,
   onClear,
   hasActiveFilter,
+  onFilterPress,
 }: ExploreSearchBarProps) {
   return (
     <View className="flex-row items-center bg-surface rounded-2xl px-4 py-3 gap-2" style={styles.shadow}>
@@ -38,11 +40,14 @@ export function ExploreSearchBar({
       ) : (
         <View className="h-5 w-px bg-surface-container" />
       )}
-      <TouchableOpacity hitSlop={8}>
-        <AdjustmentsHorizontalIcon
-          size={18}
-          color={hasActiveFilter ? COLORS.primary : COLORS.secondary}
-        />
+      <TouchableOpacity onPress={onFilterPress} hitSlop={8}>
+        {hasActiveFilter ? (
+          <View className="w-5 h-5 rounded-full bg-primary items-center justify-center">
+            <AdjustmentsHorizontalIcon size={13} color="#fff" />
+          </View>
+        ) : (
+          <AdjustmentsHorizontalIcon size={18} color={COLORS.secondary} />
+        )}
       </TouchableOpacity>
     </View>
   );
