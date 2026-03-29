@@ -1,0 +1,57 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "ignorePaths": [
+    "node_modules/**",
+    "android/**",
+    "ios/**",
+    "*.lock",
+    "package-lock.json"
+  ],
+  "words": [
+    "modami",
+    "nativewind",
+    "zustand",
+    "mmkv",
+    "heroicons",
+    "vietqr",
+    "sepay",
+    "Vietcombank",
+    "Techcombank",
+    "mbmobile",
+    "bidv",
+    "BIDV",
+    "Agribank",
+    "agribank",
+    "vpbank",
+    "VPBank",
+    "tpbank",
+    "TPBank",
+    "Sacombank",
+    "sacombank",
+    "hdbank",
+    "HDBank",
+    "seab",
+    "SEAB",
+    "seabank",
+    "SeABank",
+    "momo",
+    "MOMO",
+    "zalopay",
+    "ZaloPay",
+    "Zalo",
+    "gorhom",
+    "Vietinbank",
+    "vietinbank",
+    "THUONG"
+  ],
+  "flagWords": [],
+  "overrides": [
+    {
+      "filename": "**/*.{ts,tsx,js,jsx}",
+      "ignoreRegExpList": [
+        "[\\u0080-\\uFFFF]+"
+      ]
+    }
+  ]
+}
