@@ -21,6 +21,18 @@ export function formatPriceShort(amount: number): string {
   return `${Math.round(amount / 1000)}k`;
 }
 
+/** Convert Vietnamese string to URL slug */
+export function toSlug(str: string): string {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')   // bỏ dấu
+    .replace(/đ/g, 'd').replace(/Đ/g, 'd')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+}
+
 /** Relative time (e.g., "2 giờ trước") */
 export function timeAgo(isoString: string): string {
   const now = Date.now();

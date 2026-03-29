@@ -16,6 +16,7 @@ export type PaidMembershipTierId = 'style' | 'elite';
 export interface Product {
   id: string;
   title: string;
+  slug?: string;
   price: number;
   creditCost: number;
   images: string[];
@@ -68,6 +69,30 @@ export interface Product {
 }
 
 export type ProductCondition = 'new' | 'like-new' | 'good' | 'fair';
+
+export type ListingStatus = 'pending' | 'under_review' | 'approved' | 'rejected' | 'sold';
+
+export interface AdminFeedback {
+  reviewedAt: string;
+  reviewerName: string;
+  reasonCategory: string;
+  notes: string;
+  suggestedAction?: string;
+}
+
+export interface MyListing {
+  id: string;
+  title: string;
+  price: number;
+  images: string[];
+  category: string;
+  condition: ProductCondition;
+  status: ListingStatus;
+  submittedAt: string;
+  updatedAt: string;
+  productId?: string;
+  adminFeedback?: AdminFeedback;
+}
 
 export interface ProductFilter {
   category?: string;
