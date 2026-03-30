@@ -1,3 +1,5 @@
+import type { HomeCategory, NearbyProduct, Product, TrendBlog } from './app.type';
+
 // ─── Common response wrappers ────────────────────────────────────────────────
 
 export interface ResponseData<T> {
@@ -17,6 +19,16 @@ export interface ResponsePagination<T> {
   data: T[];
   meta: PaginationMeta;
   success: boolean;
+}
+
+// ─── Domain response shapes ───────────────────────────────────────────────────
+
+export interface HomeScreenData {
+  newArrivals: Product[];
+  featuredProducts: Product[];
+  categories: HomeCategory[];
+  nearbyProducts: NearbyProduct[];
+  trends: TrendBlog[];
 }
 
 // ─── Filter params ────────────────────────────────────────────────────────────
