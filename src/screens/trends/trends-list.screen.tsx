@@ -12,7 +12,6 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowRight, BookOpen, TrendingUp } from 'lucide-react-native';
 import type { RootStackScreenProps } from '@/navigation/navigation.type';
-import { mockTrends } from '@/data/mock-trends.mock';
 import {
   TRENDS_PAGE_HERO,
   TRENDS_FORECAST_LABEL,
@@ -22,8 +21,58 @@ import {
 } from '@/data/mock-trends-page.mock';
 import { COLORS } from '@/constants/app.constants';
 import { TrendListRow } from './components/trend-list-row.component';
+import { useBlogs } from '@/hooks/queries/blog.queries';
+import { SkeletonBox, SkeletonRow } from '@/components/ui/skeleton.component';
 
 type Props = RootStackScreenProps<'TrendsList'>;
+
+function TrendListRowSkeleton() {
+  return (
+    <SkeletonRow>
+      <SkeletonBox width={88} height={88} borderRadius={12} />
+      <View style={{ flex: 1, gap: 8 }}>
+        <SkeletonBox width={60} height={10} />
+        <SkeletonBox width={180} height={12} />
+        <SkeletonBox width={120} height={10} />
+      </View>
+    </SkeletonRow>
+  );
+}
+
+function TrendsListSkeleton({ bottomPad }: { bottomPad: number }) {
+  return (
+    <ScrollView
+      className="flex-1 bg-background"
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ paddingBottom: bottomPad + 24 }}
+    >
+      <View className="px-4 pt-2 gap-4">
+        {/* Hero banner */}
+        <SkeletonBox width="100%" height={260} borderRadius={24} />
+
+        <View style={{ gap: 16, paddingTop: 24 }}>
+          {/* Section title */}
+          <SkeletonBox width={160} height={20} />
+
+          {/* Featured card */}
+          <View style={{ gap: 8 }}>
+            <SkeletonBox width="100%" height={220} borderRadius={16} />
+            <SkeletonBox width={80} height={12} />
+            <SkeletonBox width={200} height={12} />
+            <SkeletonBox width={140} height={12} />
+          </View>
+
+          {/* List rows */}
+          <View style={{ gap: 12 }}>
+            <TrendListRowSkeleton />
+            <TrendListRowSkeleton />
+            <TrendListRowSkeleton />
+          </View>
+        </View>
+      </View>
+    </ScrollView>
+  );
+}
 
 const cardShadow = Platform.select({
   ios: {
@@ -37,12 +86,18 @@ const cardShadow = Platform.select({
 
 export function TrendsListScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
+  const { data, isLoading } = useBlogs();
 
   const { featured, rest } = useMemo(() => {
-    const f = mockTrends.find((b) => b.isFeatured) ?? mockTrends[0];
-    const r = mockTrends.filter((b) => b.id !== f?.id);
+    const blogs = data?.data ?? [];
+    const f = blogs.find((b) => b.isFeatured) ?? blogs[0];
+    const r = blogs.filter((b) => b.id !== f?.id);
     return { featured: f, rest: r };
-  }, []);
+  }, [data]);
+
+  if (isLoading) {
+    return <TrendsListSkeleton bottomPad={insets.bottom} />;
+  }
 
   const openWebTrends = () => {
     Linking.openURL(TRENDS_WEB_URL);

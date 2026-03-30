@@ -1,9 +1,12 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, Text, ScrollView, Image, TouchableOpacity, Linking } from 'react-native';
+import { useQueryClient } from '@tanstack/react-query';
 import type { RootStackScreenProps } from '@/navigation/navigation.type';
-import { mockTrends } from '@/data/mock-trends.mock';
 import { TRENDS_WEB_URL } from '@/data/mock-trends-page.mock';
-import type { TrendReadingLevel } from '@/types/app.type';
+import type { TrendBlog, TrendReadingLevel } from '@/types/app.type';
+import type { ResponsePagination, ResponseData } from '@/types/api.types';
+import { useBlog, blogKeys } from '@/hooks/queries/blog.queries';
+import { SkeletonBox } from '@/components/ui/skeleton.component';
 
 type Props = RootStackScreenProps<'BlogDetail'>;
 
@@ -13,14 +16,86 @@ const READING_LEVEL_LABEL: Record<TrendReadingLevel, string> = {
   deep: 'Chuyên sâu',
 };
 
+function BlogDetailSkeleton() {
+  return (
+    <ScrollView className="flex-1 bg-background" showsVerticalScrollIndicator={false}>
+      {/* Cover image */}
+      <SkeletonBox width="100%" height={220} borderRadius={0} />
+
+      <View className="px-5 pt-4 gap-3">
+        {/* Topic row */}
+        <SkeletonBox width={80} height={10} />
+
+        {/* Title — two lines */}
+        <SkeletonBox width="100%" height={28} />
+        <SkeletonBox width="70%" height={28} />
+
+        {/* Dek */}
+        <SkeletonBox width="90%" height={16} />
+
+        {/* Excerpt lines */}
+        <SkeletonBox width="100%" height={14} />
+        <SkeletonBox width="100%" height={14} />
+        <SkeletonBox width="100%" height={14} />
+
+        {/* Author card */}
+        <View
+          style={{
+            padding: 16,
+            borderWidth: 1,
+            borderColor: '#edeeed',
+            borderRadius: 16,
+            gap: 8,
+          }}
+        >
+          <SkeletonBox width={60} height={10} />
+          <SkeletonBox width={140} height={18} />
+          <SkeletonBox width={200} height={14} />
+        </View>
+
+        {/* Body paragraphs */}
+        <SkeletonBox width="100%" height={14} />
+        <SkeletonBox width="100%" height={14} />
+        <SkeletonBox width="100%" height={14} />
+        <SkeletonBox width="100%" height={14} />
+        <SkeletonBox width="75%" height={14} />
+      </View>
+    </ScrollView>
+  );
+}
+
 export function BlogDetailScreen({ route }: Props) {
   const { blogId } = route.params;
-  const blog = mockTrends.find((b) => b.id === blogId);
+  const queryClient = useQueryClient();
+
+  // Seed detail cache from list cache on first render — avoids skeleton when
+  // navigating from TrendsListScreen where the blog is already cached.
+  useEffect(() => {
+    const detailKey = blogKeys.detail(blogId);
+    if (queryClient.getQueryData(detailKey)) {
+      return;
+    }
+    const listCache = queryClient.getQueriesData<ResponsePagination<TrendBlog>>({ queryKey: blogKeys.lists() });
+    for (const [, listData] of listCache) {
+      const match = listData?.data?.find((b) => b.id === blogId);
+      if (match) {
+        queryClient.setQueryData<ResponseData<TrendBlog>>(detailKey, { data: match, success: true });
+        break;
+      }
+    }
+  }, [blogId, queryClient]);
+
+  const { data, isLoading } = useBlog(blogId);
+  const blog = data?.data;
 
   const paragraphs = useMemo(() => {
     if (!blog?.body) return [];
     return blog.body.split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
   }, [blog?.body]);
+
+  if (isLoading) {
+    return <BlogDetailSkeleton />;
+  }
 
   if (!blog) {
     return (

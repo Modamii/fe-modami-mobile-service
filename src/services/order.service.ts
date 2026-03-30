@@ -2,7 +2,7 @@ import { mockOrders } from '@/data/mock-orders.mock';
 import type { Order } from '@/types/app.type';
 import type { ResponseData } from '@/types/api.types';
 
-const delay = (ms = 800) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+const delay = (ms = 300) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 export const orderService = {
   async getMyOrders(): Promise<ResponseData<Order[]>> {

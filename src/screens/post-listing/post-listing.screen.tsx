@@ -83,7 +83,7 @@ export function PostListingScreen({ navigation }: Props) {
             </Text>
           </View>
 
-          <View className="px-5 pt-4 pb-2">
+          <View className="pt-4 pb-2" style={{ paddingHorizontal: 20 }}>
             <SectionTitle>Ảnh sản phẩm</SectionTitle>
             <PhotoGrid
               photos={photos}

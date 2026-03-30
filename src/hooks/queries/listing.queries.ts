@@ -30,7 +30,7 @@ export function useSeedListingCache() {
   return (listing: MyListing) => {
     queryClient.setQueryData<ResponseData<MyListing>>(
       listingKeys.detail(listing.id),
-      { data: listing },
+      { data: listing, success: true },
     );
   };
 }

@@ -14,7 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { CameraRoll } from '@react-native-camera-roll/camera-roll';
+import { CameraRoll, iosRequestAddOnlyGalleryPermission } from '@react-native-camera-roll/camera-roll';
 import RNFS from 'react-native-fs';
 import {
   BottomSheetModal,
@@ -59,25 +59,35 @@ const HOW_IT_WORKS = [
 // Dùng VietQR Universal Links thay custom schemes:
 // - openURL với https:// không cần LSApplicationQueriesSchemes
 // - iOS tự mở app nếu cài, fallback Safari nếu chưa
-const VIETNAM_BANKS = [
-  { id: 'vcb', name: 'Vietcombank', shortName: 'VCB', scheme: 'https://dl.vietqr.io/pay?app=vcb', color: '#007b5e' },
-  { id: 'vtb', name: 'Vietinbank', shortName: 'VTB', scheme: 'https://dl.vietqr.io/pay?app=icb', color: '#005baa' },
-  { id: 'tcb', name: 'Techcombank', shortName: 'TCB', scheme: 'https://dl.vietqr.io/pay?app=tcb', color: '#e31837' },
-  { id: 'mb', name: 'MB Bank', shortName: 'MB', scheme: 'https://dl.vietqr.io/pay?app=mb', color: '#0066cc' },
-  { id: 'acb', name: 'ACB', shortName: 'ACB', scheme: 'https://dl.vietqr.io/pay?app=acb', color: '#0066b3' },
-  { id: 'bidv', name: 'BIDV', shortName: 'BIDV', scheme: 'https://dl.vietqr.io/pay?app=bidv', color: '#1a3c6e' },
-  { id: 'agr', name: 'Agribank', shortName: 'AGR', scheme: 'https://dl.vietqr.io/pay?app=vba', color: '#009944' },
-  { id: 'vpb', name: 'VPBank', shortName: 'VPB', scheme: 'https://dl.vietqr.io/pay?app=vpb', color: '#f06400' },
-  { id: 'tpb', name: 'TPBank', shortName: 'TPB', scheme: 'https://dl.vietqr.io/pay?app=tpb', color: '#6a0dad' },
-  { id: 'stb', name: 'Sacombank', shortName: 'STB', scheme: 'https://dl.vietqr.io/pay?app=stb', color: '#0066cc' },
-  { id: 'hdb', name: 'HDBank', shortName: 'HDB', scheme: 'https://dl.vietqr.io/pay?app=hdb', color: '#003087' },
-  { id: 'ocb', name: 'OCB', shortName: 'OCB', scheme: 'https://dl.vietqr.io/pay?app=ocb', color: '#f26522' },
-  { id: 'msb', name: 'MSB', shortName: 'MSB', scheme: 'https://dl.vietqr.io/pay?app=msb', color: '#e4002b' },
-  { id: 'shb', name: 'SHB', shortName: 'SHB', scheme: 'https://dl.vietqr.io/pay?app=shb', color: '#cc0000' },
-  { id: 'seab', name: 'SeABank', shortName: 'SEAB', scheme: 'https://dl.vietqr.io/pay?app=seab', color: '#e31837' },
-  { id: 'momo', name: 'Ví MoMo', shortName: 'MOMO', scheme: 'momo://', color: '#ae2070' },
-  { id: 'zalopay', name: 'ZaloPay', shortName: 'ZALO', scheme: 'zalopay://', color: '#0068ff' },
-] as const;
+
+type VietnamBank = {
+  id: string;
+  name: string;
+  shortName: string;
+  scheme: string;
+  color: string;
+  logo?: ReturnType<typeof require>;
+};
+
+const VIETNAM_BANKS: VietnamBank[] = [
+  { id: 'vcb', name: 'Vietcombank', shortName: 'VCB', scheme: 'https://dl.vietqr.io/pay?app=vcb', color: '#007b5e', logo: require('@/assets/banks/vietcombank.png') },
+  { id: 'vtb', name: 'Vietinbank', shortName: 'VTB', scheme: 'https://dl.vietqr.io/pay?app=icb', color: '#005baa', logo: require('@/assets/banks/vietinbank.png') },
+  { id: 'tcb', name: 'Techcombank', shortName: 'TCB', scheme: 'https://dl.vietqr.io/pay?app=tcb', color: '#e31837', logo: require('@/assets/banks/techcombank.png') },
+  { id: 'mb', name: 'MB Bank', shortName: 'MB', scheme: 'https://dl.vietqr.io/pay?app=mb', color: '#0066cc', logo: require('@/assets/banks/mb.png') },
+  { id: 'acb', name: 'ACB', shortName: 'ACB', scheme: 'https://dl.vietqr.io/pay?app=acb', color: '#0066b3', logo: require('@/assets/banks/acb.png') },
+  { id: 'bidv', name: 'BIDV', shortName: 'BIDV', scheme: 'https://dl.vietqr.io/pay?app=bidv', color: '#1a3c6e', logo: require('@/assets/banks/bidv.png') },
+  { id: 'agr', name: 'Agribank', shortName: 'AGR', scheme: 'https://dl.vietqr.io/pay?app=vba', color: '#009944', logo: require('@/assets/banks/agribank.png') },
+  { id: 'vpb', name: 'VPBank', shortName: 'VPB', scheme: 'https://dl.vietqr.io/pay?app=vpb', color: '#f06400', logo: require('@/assets/banks/vpbank.png') },
+  { id: 'tpb', name: 'TPBank', shortName: 'TPB', scheme: 'https://dl.vietqr.io/pay?app=tpb', color: '#6a0dad', logo: require('@/assets/banks/tpbank.png') },
+  { id: 'stb', name: 'Sacombank', shortName: 'STB', scheme: 'https://dl.vietqr.io/pay?app=stb', color: '#0066cc', logo: require('@/assets/banks/sacombank.png') },
+  { id: 'hdb', name: 'HDBank', shortName: 'HDB', scheme: 'https://dl.vietqr.io/pay?app=hdb', color: '#003087', logo: require('@/assets/banks/hdbank.png') },
+  { id: 'ocb', name: 'OCB', shortName: 'OCB', scheme: 'https://dl.vietqr.io/pay?app=ocb', color: '#f26522', logo: require('@/assets/banks/ocb.webp') },
+  { id: 'msb', name: 'MSB', shortName: 'MSB', scheme: 'https://dl.vietqr.io/pay?app=msb', color: '#e4002b', logo: require('@/assets/banks/msb.webp') },
+  { id: 'shb', name: 'SHB', shortName: 'SHB', scheme: 'https://dl.vietqr.io/pay?app=shb', color: '#cc0000', logo: require('@/assets/banks/shb.webp') },
+  { id: 'seab', name: 'SeABank', shortName: 'SEAB', scheme: 'https://dl.vietqr.io/pay?app=seab', color: '#e31837', logo: require('@/assets/banks/seabank.webp') },
+  { id: 'momo', name: 'Ví MoMo', shortName: 'MOMO', scheme: 'momo://', color: '#ae2070', logo: require('@/assets/banks/momo.png') },
+  { id: 'zalopay', name: 'ZaloPay', shortName: 'ZALO', scheme: 'zalopay://', color: '#0068ff', logo: require('@/assets/banks/zalopay.png') },
+];
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -238,12 +248,21 @@ function BankBottomSheet({ visible, onClose }: BankBottomSheetProps) {
                   onPress={() => handleOpenBank(bank)}
                   className="flex-row items-center gap-3 px-5 py-3"
                 >
-                  <View
-                    className="w-10 h-10 rounded-full items-center justify-center"
-                    style={{ backgroundColor: bank.color }}
-                  >
-                    <Text className="text-white text-[10px] font-black">{bank.shortName}</Text>
-                  </View>
+                  {bank.logo ? (
+                    <View
+                      className="w-10 h-10 rounded-full items-center justify-center"
+                      style={{ backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#edeeed' }}
+                    >
+                      <Image source={bank.logo} style={{ width: 32, height: 32 }} resizeMode="contain" />
+                    </View>
+                  ) : (
+                    <View
+                      className="w-10 h-10 rounded-full items-center justify-center"
+                      style={{ backgroundColor: bank.color }}
+                    >
+                      <Text className="text-white text-[10px] font-black">{bank.shortName}</Text>
+                    </View>
+                  )}
                   <Text className="flex-1 text-sm font-medium text-on-surface">{bank.name}</Text>
                   <ChevronRightIcon size={16} color={COLORS.secondary} />
                 </TouchableOpacity>
@@ -301,6 +320,18 @@ const ensureAndroidSavePhotoPermission = async (): Promise<boolean> => {
   return true;
 };
 
+const ensureIOSSavePhotoPermission = async (): Promise<boolean> => {
+  if (Platform.OS !== 'ios') {
+    return true;
+  }
+  const status = await iosRequestAddOnlyGalleryPermission();
+  if (status === 'denied' || status === 'blocked' || status === 'unavailable') {
+    Alert.alert('Không có quyền', 'Vui lòng cấp quyền ảnh trong Cài đặt để lưu mã QR.');
+    return false;
+  }
+  return true;
+};
+
 function QRPaymentModal({ visible, method, pkg, orderRef, onComplete, onClose }: QRPaymentModalProps) {
   const [bankSheetVisible, setBankSheetVisible] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -329,6 +360,9 @@ function QRPaymentModal({ visible, method, pkg, orderRef, onComplete, onClose }:
       if (!(await ensureAndroidSavePhotoPermission())) {
         return;
       }
+      if (!(await ensureIOSSavePhotoPermission())) {
+        return;
+      }
       // Giống mẫu: ghi file local rồi CameraRoll.save(file://…) — API chỉ khuyến nghị URI local, tránh lỗi HTTPS / data: trên iOS.
       const filePath = `${RNFS.CachesDirectoryPath}/modami-qr-${Date.now()}.png`;
       const { promise } = RNFS.downloadFile({ fromUrl: qrUrl, toFile: filePath });
@@ -337,7 +371,16 @@ function QRPaymentModal({ visible, method, pkg, orderRef, onComplete, onClose }:
         throw new Error(`Tải ảnh thất bại (HTTP ${statusCode})`);
       }
       const fileUri = filePath.startsWith('file://') ? filePath : `file://${filePath}`;
-      await CameraRoll.save(fileUri, { type: 'photo' });
+      try {
+        await CameraRoll.save(fileUri, { type: 'photo' });
+      } catch (saveError) {
+        // Known iOS bug: first-time permission grant causes CameraRoll.save() to throw
+        // "Unknown error from a native module" even though the photo IS saved successfully.
+        // Re-throw only if it's a real error (not this false-positive).
+        if (Platform.OS !== 'ios' || !String(saveError).includes('Unknown error from a native module')) {
+          throw saveError;
+        }
+      }
       RNFS.unlink(filePath).catch(() => {});
       Alert.alert('Đã lưu!', 'Mã QR đã được lưu vào thư viện ảnh.');
     } catch (error) {

@@ -4,7 +4,7 @@ import type { SellerProfile, Product } from '@/types/app.type';
 import type { ResponseData } from '@/types/api.types';
 
 /** Simulates network latency. Remove when switching to real API. */
-const delay = (ms = 3000) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+const delay = (ms = 300) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 // ─── Service ─────────────────────────────────────────────────────────────────
 

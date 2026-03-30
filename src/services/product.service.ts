@@ -4,7 +4,7 @@ import type { Product } from '@/types/app.type';
 import type { FilterProducts, ResponseData, ResponsePagination } from '@/types/api.types';
 
 /** Simulates network latency. Remove when switching to real API. */
-const delay = (ms = 3000) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+const delay = (ms = 300) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 // ─── Local filter helper (mock-only, remove when API handles filtering) ───────
 
