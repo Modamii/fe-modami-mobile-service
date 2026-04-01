@@ -22,8 +22,8 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import type { RootStackScreenProps } from '@/navigation/navigation.type';
 import { ProductCard } from '@/components/molecules/product-card.component';
-import { getSellerProfile, getSellerProducts } from '@/data/mock-sellers.mock';
 import { productKeys } from '@/hooks/queries/product.queries';
+import { useSeller, useSellerProducts } from '@/hooks/queries/seller.queries';
 import { COLORS } from '@/constants/app.constants';
 import type { Product } from '@/types/app.type';
 import { ReviewCard } from './components/review-card.component';
@@ -44,7 +44,7 @@ const cardShadow = Platform.select({
   android: { elevation: 2 },
 });
 
-export function SellerDetailScreen({ navigation, route }: Props) {
+export function SellerDetailScreen({ navigation, route }: Readonly<Props>) {
   const { sellerId } = route.params;
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
@@ -52,8 +52,25 @@ export function SellerDetailScreen({ navigation, route }: Props) {
   const [gridRowWidth, setGridRowWidth] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
 
-  const seller = useMemo(() => getSellerProfile(sellerId), [sellerId]);
-  const products = useMemo(() => getSellerProducts(sellerId), [sellerId]);
+  const {
+    data: sellerData,
+    isLoading: isSellerLoading,
+    isFetching: isSellerFetching,
+    error: sellerError,
+    refetch: refetchSeller,
+  } = useSeller(sellerId);
+
+  const {
+    data: sellerProductsData,
+    isLoading: isProductsLoading,
+    isFetching: isProductsFetching,
+    error: productsError,
+    refetch: refetchProducts,
+  } = useSellerProducts(sellerId);
+
+  const seller = sellerData?.data ?? null;
+  const products = sellerProductsData?.data ?? [];
+  const isInitialLoading = (isSellerLoading || isProductsLoading) && !seller;
 
   const columnWidth = useMemo(() => {
     const available =
@@ -62,9 +79,47 @@ export function SellerDetailScreen({ navigation, route }: Props) {
   }, [gridRowWidth, windowWidth]);
 
   const handleProductPress = (p: Product) => {
-    queryClient.setQueryData(productKeys.detail(p.id), { data: p });
+    queryClient.setQueryData(productKeys.detail(p.id), { data: p, success: true });
     navigation.navigate('ProductDetail', { productId: p.id });
   };
+
+  if (isInitialLoading) {
+    return (
+      <View className="flex-1 bg-background items-center justify-center px-6 gap-2">
+        <Text className="text-on-surface text-base font-semibold text-center">
+          Đang tải thông tin người bán...
+        </Text>
+        <Text className="text-secondary text-center">Vui lòng chờ trong giây lát.</Text>
+      </View>
+    );
+  }
+
+  if ((sellerError || productsError) && !seller) {
+    return (
+      <View className="flex-1 bg-background items-center justify-center px-6 gap-3">
+        <Text className="text-on-surface text-base font-semibold text-center">
+          Không thể tải dữ liệu người bán
+        </Text>
+        <Text className="text-secondary text-center">
+          Vui lòng kiểm tra kết nối và thử lại.
+        </Text>
+        <TouchableOpacity
+          onPress={() => {
+            void refetchSeller();
+            void refetchProducts();
+          }}
+          className="bg-primary rounded-xl px-4 py-3"
+          accessibilityRole="button"
+          accessibilityLabel="Thử lại"
+        >
+          <Text className="text-on-primary font-semibold">Thử lại</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Text className="text-primary font-semibold">Quay lại</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   if (!seller) {
     return (
@@ -190,6 +245,10 @@ export function SellerDetailScreen({ navigation, route }: Props) {
         </View>
 
         <View className="px-4 pt-6 gap-6">
+          {(isSellerFetching || isProductsFetching) && (
+            <Text className="text-xs text-secondary">Đang cập nhật dữ liệu mới nhất...</Text>
+          )}
+
           <View className="bg-surface-container rounded-3xl p-4 gap-3">
             <Text className="text-xs font-bold text-on-surface uppercase tracking-widest">
               Giới thiệu

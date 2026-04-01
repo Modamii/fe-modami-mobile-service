@@ -11,6 +11,8 @@ export const AUTH_URL =
   'https://modami-auth.techinsightsworld.com/v1/auth-services';
 export const USER_URL =
   'https://modami-user.techinsightsworld.com/v1/user-services';
+export const CORE_URL =
+  'https://modami-core.techinsightsworld.com/v1/core-services';
 
 // ─── Unauthorized callback ─────────────────────────────────────────────────────
 

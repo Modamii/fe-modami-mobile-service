@@ -66,6 +66,62 @@ rn-modami-service/
 └── docs/                   # Developer documentation
 ```
 
+## Backend API Integration
+
+Services use an **API-first with safe fallback** pattern. When an API request fails, the app gracefully falls back to mock data to ensure UI stability during API outages or offline scenarios.
+
+### Backend URLs
+
+Configured in `src/lib/axios.ts`:
+
+| Service | URL | Used By |
+|---|---|---|
+| **CORE_URL** | `https://modami-core.techinsightsworld.com/v1/core-services` | Products, Home, Sellers, Listings |
+| **AUTH_URL** | `https://modami-auth.techinsightsworld.com/v1/auth-services` | Login, Register, Auth flows |
+| **USER_URL** | `https://modami-user.techinsightsworld.com/v1/user-services` | User profile, account settings |
+
+### Service Pattern
+
+All services in `src/services/` follow this architecture:
+
+```ts
+// 1. Define Core API types (DTO mapping)
+type CoreProduct = { id?: string; title?: string; /* ... */ };
+
+// 2. Implement tolerant unwrapping (handles items/products/rows/categories)
+function unwrapList<T>(data: unknown): T[] {
+  if (Array.isArray(data)) return data;
+  if (data?.items) return data.items;
+  if (data?.products) return data.products;
+  return [];
+}
+
+// 3. Implement DTO mappers
+function mapCoreProductToAppProduct(item: CoreProduct): Product { /* ... */ }
+
+// 4. Wrap API calls with fallback
+export const myService = {
+  getList: async () => {
+    try {
+      const res = await axiosClient.get('/endpoint');
+      return { data: unwrapList(res.data).map(mapCoreProductToAppProduct), success: true };
+    } catch {
+      return { data: mockData, success: true }; // Silent fallback to mock
+    }
+  }
+};
+```
+
+### DTO Mapping Strategy
+
+Backend responses often use snake_case with nested objects. Services normalize to app types:
+
+- `like_new` (backend) → `like-new` (app)
+- `seller.display_name` (nested) → `sellerName` (flat)
+- Missing fields use sensible defaults
+
+See `src/services/product.service.ts` for a complete example.
+
 ## Adding a New Screen
 
 **1. Add the route to `src/navigation/types.ts`:**
