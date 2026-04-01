@@ -20,6 +20,7 @@ import { EditProfileScreen } from '@/screens/profile/edit-profile.screen';
 import { SavedScreen } from '@/screens/saved/saved.screen';
 import { MyListingsScreen } from '@/screens/my-listings/my-listings.screen';
 import { ListingDetailScreen } from '@/screens/my-listings/listing-detail.screen';
+import { ListingSuccessScreen } from '@/screens/post-listing/listing-success.screen';
 import { OrderHistoryScreen } from '@/screens/orders/order-history.screen';
 import { LoginScreen } from '@/screens/auth/login.screen';
 import { RegisterScreen } from '@/screens/auth/register.screen';
@@ -114,6 +115,11 @@ export function RootNavigator() {
             name="ListingDetail"
             component={ListingDetailScreen}
             options={{ ...headerBase, title: 'Chi tiết bài đăng' }}
+          />
+          <Stack.Screen
+            name="ListingSuccess"
+            component={ListingSuccessScreen}
+            options={{ headerShown: false, animation: 'slide_from_right' }}
           />
           <Stack.Screen
             name="OrderHistory"

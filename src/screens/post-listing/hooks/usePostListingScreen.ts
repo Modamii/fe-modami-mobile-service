@@ -11,7 +11,7 @@ import {
 } from 'react-native-image-picker';
 import { listingService } from '@/services/listing.service';
 import { listingKeys } from '@/hooks/queries/listing.queries';
-import type { ProductCondition } from '@/types/app.type';
+import type { MyListing, ProductCondition } from '@/types/app.type';
 
 export type PhotoItem = {
   id: string;
