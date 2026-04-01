@@ -9,7 +9,6 @@ import BottomSheet, {
   BottomSheetView,
   BottomSheetBackdrop,
   type BottomSheetBackdropProps,
-  type BottomSheetMethods,
 } from '@gorhom/bottom-sheet';
 import { ShieldCheckIcon } from 'react-native-heroicons/solid';
 import { XMarkIcon } from 'react-native-heroicons/outline';
@@ -18,7 +17,7 @@ import { Button } from '@/components/ui/button.component';
 import { COLORS } from '@/constants/app.constants';
 
 interface OtpVerifySheetProps {
-  sheetRef: React.RefObject<BottomSheetMethods | null>;
+  sheetRef: React.RefObject<React.ElementRef<typeof BottomSheet> | null>;
   email: string;
   otp: string;
   onOtpChange: (text: string) => void;

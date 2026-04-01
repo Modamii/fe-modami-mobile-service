@@ -11,7 +11,7 @@
 
 1. **iOS Permission Cleanup**: Removed empty `NSLocationWhenInUseUsageDescription` key from `ios/Modami/Info.plist`. This key was declared with an empty string value, causing rejection on App Store review. Since the app does not request location services, the permission has been completely removed.
 
-2. **Android Permission Hardening**: Removed overly broad `WRITE_EXTERNAL_STORAGE` permission from `AndroidManifest.xml`. For Android 13+ (API 33+), the app now relies solely on the fine-grained `READ_MEDIA_IMAGES` permission via runtime request in the QR save flow.
+2. **Android Permission Hardening**: Restricted legacy `WRITE_EXTERNAL_STORAGE` permission to `maxSdkVersion=28` in `AndroidManifest.xml`. For Android 13+ (API 33+), app dùng `READ_MEDIA_IMAGES`; Android 29-32 dùng scoped storage không cần xin quyền ghi ngoài.
 
    - **Before**: `WRITE_EXTERNAL_STORAGE` used for all devices + `READ_MEDIA_IMAGES` for API 33+ (redundant/unnecessary)
    - **After**: Only `READ_MEDIA_IMAGES` declared; runtime logic (in credits screen) already handles API level fallback correctly
@@ -33,26 +33,27 @@
 <!-- BEFORE -->
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
 <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
-<!-- Redundant on newer API levels -->
+<!-- Permission scope quá rộng -->
 
 <!-- AFTER -->
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28"/>
 <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
-<!-- Single, focused permission ✅ -->
+<!-- Thu hẹp legacy permission + giữ quyền granular ✅ -->
 ```
 
 ### Files modified
 
 - `ios/Modami/Info.plist` — Removed `NSLocationWhenInUseUsageDescription` key (lines ~47)
-- `android/app/src/main/AndroidManifest.xml` — Removed `WRITE_EXTERNAL_STORAGE` permission declaration
+- `android/app/src/main/AndroidManifest.xml` — Giới hạn `WRITE_EXTERNAL_STORAGE` còn `maxSdkVersion=28`
+- `src/screens/profile/credits.screen.tsx` — Runtime split: API >=33 xin `READ_MEDIA_IMAGES`, API 29-32 không xin quyền ghi ngoài, API <=28 xin `WRITE_EXTERNAL_STORAGE`
 
 ### Runtime Behavior (No Changes)
 
-The QR save functionality in `src/screens/profile/credits.screen.tsx` already implements correct platform-aware logic:
+The QR save functionality in `src/screens/profile/credits.screen.tsx` now implements stricter platform-aware logic:
 - **Android API 33+**: Requests `READ_MEDIA_IMAGES` (fine-grained photo permission)
-- **Android API < 33**: Requests `WRITE_EXTERNAL_STORAGE` (legacy fallback, still honored by OS)
+- **Android API 29-32**: No storage write permission request (scoped storage)
+- **Android API <= 28**: Requests `WRITE_EXTERNAL_STORAGE` (legacy fallback)
 - **iOS**: Requests photo library add-only permission via `NSPhotoLibraryAddUsageDescription`
-
-No app code changes needed — the permission declarations now match actual usage.
 
 ### How to test
 

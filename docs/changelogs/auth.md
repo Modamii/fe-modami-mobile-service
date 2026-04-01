@@ -60,7 +60,7 @@
 ### Notes / caveats
 
 - Backend API `DELETE /users/me` must be implemented (not mock yet)
-- Privacy Policy & Terms URLs must be publicly accessible
+- Privacy Policy & Terms URLs (`modami.app`) phải public và truy cập được
 - Delete account dialog uses Vietnamese text ("Xóa tài khoản?", "Hành động này sẽ xóa vĩnh viễn...")
 - On Android, no permission changes needed for this feature
 - iOS Info.plist photo permissions already support consent flow (ask on first use)

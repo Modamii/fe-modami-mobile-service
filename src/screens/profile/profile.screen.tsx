@@ -19,7 +19,12 @@ import { useProductStore } from '@/store/app.store';
 import type { MainTabScreenProps } from '@/navigation/navigation.type';
 import { useAuthStore } from '@/store/app.store';
 import { CreditChip } from '@/components/molecules/credit-chip.component';
-import { COLORS, MEMBERSHIP_TIERS } from '@/constants/app.constants';
+import {
+  COLORS,
+  MEMBERSHIP_TIERS,
+  PRIVACY_POLICY_URL,
+  TERMS_OF_SERVICE_URL,
+} from '@/constants/app.constants';
 
 type Props = MainTabScreenProps<'Profile'>;
 
@@ -215,10 +220,10 @@ export function ProfileScreen({ navigation }: Props) {
 
         {/* Privacy & Legal Links */}
         <View className="mx-5 mb-6 gap-2">
-          <TouchableOpacity onPress={() => Linking.openURL('https://modami.vn/privacy-policy')} activeOpacity={0.7}>
+          <TouchableOpacity onPress={() => Linking.openURL(PRIVACY_POLICY_URL)} activeOpacity={0.7}>
             <Text className="text-xs text-secondary text-center font-medium">Chính sách bảo mật</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => Linking.openURL('https://modami.vn/terms-of-service')} activeOpacity={0.7}>
+          <TouchableOpacity onPress={() => Linking.openURL(TERMS_OF_SERVICE_URL)} activeOpacity={0.7}>
             <Text className="text-xs text-secondary text-center font-medium">Điều khoản dịch vụ</Text>
           </TouchableOpacity>
         </View>

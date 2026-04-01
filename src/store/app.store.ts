@@ -68,13 +68,13 @@ export interface AuthState {
   ) => Promise<boolean>;
   loginWithOAuth: (provider: 'google' | 'apple') => Promise<void>;
   logout: () => Promise<void>;
+  deleteAccount: () => Promise<boolean>;
   clearAuthError: () => void;
   updateProfile: (
     patch: Partial<Pick<User, 'name' | 'bio' | 'location' | 'avatar'>>,
   ) => void;
   updateProfileApi: (data: UpdateProfileRequest) => Promise<void>;
   updateAvatarApi: (avatarUrl: string) => Promise<void>;
-  deleteAccount: () => Promise<boolean>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -164,6 +164,28 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      deleteAccount: async () => {
+        set({ isLoading: true, authError: null });
+        try {
+          await userService.deleteAccount();
+          tokenStorage.clear();
+          useCreditStore.getState().setBalance(0);
+          set({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+            authError: null,
+          });
+          return true;
+        } catch (err: any) {
+          set({
+            authError: err.message ?? 'Xóa tài khoản thất bại.',
+            isLoading: false,
+          });
+          return false;
+        }
+      },
+
       updateProfile: patch => {
         set(s => {
           if (!s.user) return s;
@@ -189,19 +211,6 @@ export const useAuthStore = create<AuthState>()(
           if (!s.user) return s;
           return { user: { ...s.user, avatar: avatarUrl } };
         });
-      },
-
-      deleteAccount: async () => {
-        try {
-          await userService.deleteAccount();
-          tokenStorage.clear();
-          useCreditStore.getState().setBalance(0);
-          set({ user: null, isAuthenticated: false, authError: null });
-          return true;
-        } catch (err: any) {
-          set({ authError: err.message ?? 'Xóa tài khoản thất bại.' });
-          return false;
-        }
       },
     }),
     {

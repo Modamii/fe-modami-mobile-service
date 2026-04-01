@@ -14,7 +14,11 @@ import { XMarkIcon } from 'react-native-heroicons/outline';
 import type { RootStackScreenProps } from '@/navigation/navigation.type';
 import { Button } from '@/components/ui/button.component';
 import { Input } from '@/components/ui/input.component';
-import { COLORS } from '@/constants/app.constants';
+import {
+  COLORS,
+  PRIVACY_POLICY_URL,
+  TERMS_OF_SERVICE_URL,
+} from '@/constants/app.constants';
 import { useLoginScreen } from './hooks/useLoginScreen';
 import { AuthBrand } from './components/auth-brand.component';
 import { AuthDivider } from './components/auth-divider.component';
@@ -151,11 +155,11 @@ export function LoginScreen({ navigation }: Props) {
 
         {/* Privacy & Legal Links */}
         <View className="flex-row justify-center mt-6 gap-3">
-          <TouchableOpacity onPress={() => Linking.openURL('https://modami.vn/privacy-policy')} activeOpacity={0.7}>
+          <TouchableOpacity onPress={() => Linking.openURL(PRIVACY_POLICY_URL)} activeOpacity={0.7}>
             <Text className="text-xs text-secondary font-medium">Chính sách bảo mật</Text>
           </TouchableOpacity>
           <Text className="text-xs text-secondary">·</Text>
-          <TouchableOpacity onPress={() => Linking.openURL('https://modami.vn/terms-of-service')} activeOpacity={0.7}>
+          <TouchableOpacity onPress={() => Linking.openURL(TERMS_OF_SERVICE_URL)} activeOpacity={0.7}>
             <Text className="text-xs text-secondary font-medium">Điều khoản</Text>
           </TouchableOpacity>
         </View>

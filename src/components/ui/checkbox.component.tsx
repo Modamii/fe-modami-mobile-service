@@ -21,7 +21,7 @@ export function Checkbox({ checked, onToggle, label, error, disabled, ...props }
         {...props}
       >
         <View
-          className={`w-5 h-5 rounded-md items-center justify-center border-2 ${
+          className={`w-5 h-5 rounded-md items-center justify-center border ${
             checked ? 'bg-primary border-primary' : 'bg-surface border-outline'
           } ${disabled ? 'opacity-40' : ''}`}
           style={

@@ -9,12 +9,17 @@ import {
   Linking,
 } from 'react-native';
 import { Controller } from 'react-hook-form';
-import { ChevronLeftIcon, CheckIcon } from 'react-native-heroicons/outline';
+import { ChevronLeftIcon } from 'react-native-heroicons/outline';
 import type { RootStackScreenProps } from '@/navigation/navigation.type';
 import { Button } from '@/components/ui/button.component';
+import { Checkbox } from '@/components/ui/checkbox.component';
 import { Input } from '@/components/ui/input.component';
 import { OtpInputComponent } from '@/components/ui/otp-input.component';
-import { COLORS } from '@/constants/app.constants';
+import {
+  COLORS,
+  PRIVACY_POLICY_URL,
+  TERMS_OF_SERVICE_URL,
+} from '@/constants/app.constants';
 import { useRegisterScreen } from './hooks/useRegisterScreen';
 import { AuthBrand } from './components/auth-brand.component';
 
@@ -178,40 +183,20 @@ export function RegisterScreen({ navigation }: Props) {
               name="consent"
               render={({ field: { onChange, value } }) => (
                 <View className="gap-2">
-                  <TouchableOpacity
-                    onPress={() => onChange(!value)}
-                    className="flex-row items-center gap-3"
-                    activeOpacity={0.7}
-                  >
-                    <View
-                      className={`w-5 h-5 rounded border-2 items-center justify-center ${
-                        value
-                          ? 'bg-primary border-primary'
-                          : 'border-secondary bg-surface'
-                      }`}
-                    >
-                      {value && <CheckIcon size={16} color="white" strokeWidth={3} />}
-                    </View>
-                    <Text className="text-sm text-on-surface flex-1 font-medium">
-                      Tôi đồng ý với{' '}
-                      <Text
-                        className="text-primary font-semibold"
-                        onPress={() => Linking.openURL('https://modami.vn/terms-of-service')}
-                      >
-                        Điều khoản dịch vụ
-                      </Text>
-                      {' '}và{' '}
-                      <Text
-                        className="text-primary font-semibold"
-                        onPress={() => Linking.openURL('https://modami.vn/privacy-policy')}
-                      >
-                        Chính sách bảo mật
-                      </Text>
-                    </Text>
-                  </TouchableOpacity>
-                  {errors.consent?.message && (
-                    <Text className="text-xs text-red-500 font-medium">{errors.consent.message}</Text>
-                  )}
+                  <Checkbox
+                    checked={Boolean(value)}
+                    onToggle={onChange}
+                    error={errors.consent?.message}
+                    label="Tôi đồng ý với Điều khoản dịch vụ và Chính sách bảo mật"
+                  />
+                  <View className="flex-row gap-4 ml-8">
+                    <TouchableOpacity onPress={() => Linking.openURL(TERMS_OF_SERVICE_URL)}>
+                      <Text className="text-xs text-primary font-semibold">Điều khoản</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}>
+                      <Text className="text-xs text-primary font-semibold">Chính sách bảo mật</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               )}
             />

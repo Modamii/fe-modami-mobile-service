@@ -307,6 +307,11 @@ const ensureAndroidSavePhotoPermission = async (): Promise<boolean> => {
     return true;
   }
 
+  if (sdk >= 29) {
+    // Scoped storage allows app-created media writes without broad storage permission.
+    return true;
+  }
+
   const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE, {
     title: 'Quyền lưu ảnh',
     message: 'ModaMi cần quyền để lưu mã QR vào thư viện ảnh.',

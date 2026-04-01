@@ -58,7 +58,7 @@ Google Play requires **Data Safety** declaration for all sensitive permissions a
 |-----------|------|------|----------------|
 | **INTERNET** | ✅ Yes | Low | Required for API calls |
 | **READ_MEDIA_IMAGES** | ✅ Yes | Low | Product images, selected by user |
-| **WRITE_EXTERNAL_STORAGE** | ❌ No — **REMOVED** | High | Removed — uses READ_MEDIA_IMAGES instead (API 33+) |
+| **WRITE_EXTERNAL_STORAGE** | ✅ Legacy only (API <= 28) | Medium | Chỉ dùng fallback thiết bị cũ; giới hạn `maxSdkVersion=28` |
 | **CAMERA** | ✅ Yes | Medium | Optional — user can choose gallery instead |
 
 ### 1. Security Practices
@@ -131,9 +131,9 @@ Google Play requires **Data Safety** declaration for all sensitive permissions a
 
 - [ ] **android/app/src/main/AndroidManifest.xml**
   - [ ] ✅ INTERNET → Present
+  - [ ] ✅ WRITE_EXTERNAL_STORAGE → Legacy only (`maxSdkVersion=28`)
   - [ ] ✅ READ_MEDIA_IMAGES → Present
-  - [ ] ✅ ~~WRITE_EXTERNAL_STORAGE~~ → **Removed** (or restricted to maxSdkVersion 32)
-  - [ ] ✅ CAMERA → Present with purpose string
+  - [ ] ✅ CAMERA permission chỉ khai báo nếu thực sự cần (app hiện không khai báo)
 
 ### Source Code
 
@@ -162,7 +162,8 @@ Google Play requires **Data Safety** declaration for all sensitive permissions a
 
 - [ ] **Credits QR Save (Android)**
   - [ ] ✅ SDK >= 33 → Use READ_MEDIA_IMAGES (fine-grained)
-  - [ ] ✅ SDK < 33 → Fall back to WRITE_EXTERNAL_STORAGE (broad, acceptable for older API)
+  - [ ] ✅ SDK 29-32 → Không yêu cầu quyền ghi ngoài (scoped storage)
+  - [ ] ✅ SDK <= 28 → Fall back to WRITE_EXTERNAL_STORAGE (legacy)
   - [ ] ✅ User sees clear permission strings
 
 ---
@@ -171,9 +172,9 @@ Google Play requires **Data Safety** declaration for all sensitive permissions a
 
 Before submission, ensure these URLs are **publicly accessible** and current:
 
-- **Privacy Policy**: `https://modami.vn/privacy-policy`
-- **Terms of Service**: `https://modami.vn/terms-of-service`
-- **Support Email**: `support@modami.vn` (or app support channel)
+- **Privacy Policy**: `https://modami.app/privacy-policy`
+- **Terms of Service**: `https://modami.app/terms-of-service`
+- **Support Email**: `support@modami.app` (or app support channel)
 
 ---
 

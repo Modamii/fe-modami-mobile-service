@@ -1,5 +1,7 @@
 export const DEMO_EMAIL = 'demo@modami.app';
 export const DEMO_PASSWORD = 'demo1234';
+export const PRIVACY_POLICY_URL = 'https://modami.vercel.app/privacy-policy';
+export const TERMS_OF_SERVICE_URL = 'https://modami.vercel.app/terms-of-service';
 
 export const COLORS = {
   primary: '#274f38',

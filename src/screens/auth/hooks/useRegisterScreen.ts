@@ -15,7 +15,9 @@ const schema = z.object({
   name: z.string().min(1, 'Vui lòng nhập tên hiển thị'),
   email: z.string().email('Email không hợp lệ'),
   password: z.string().min(8, 'Mật khẩu tối thiểu 8 ký tự'),
-  consent: z.boolean().refine((val) => val === true, 'Bạn phải đồng ý với Điều khoản dịch vụ và Chính sách bảo mật'),
+  consent: z
+    .boolean()
+    .refine(value => value, 'Bạn cần đồng ý Điều khoản và Chính sách bảo mật.'),
 });
 
 export type RegisterFormValues = z.infer<typeof schema>;
@@ -35,7 +37,13 @@ export function useRegisterScreen() {
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { username: '', name: '', email: '', password: '', consent: false },
+    defaultValues: {
+      username: '',
+      name: '',
+      email: '',
+      password: '',
+      consent: false,
+    },
   });
 
   // Bước 1: gửi OTP
