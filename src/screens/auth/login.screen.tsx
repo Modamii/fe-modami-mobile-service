@@ -6,6 +6,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
+  Linking,
 } from 'react-native';
 import { Controller } from 'react-hook-form';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -145,6 +146,17 @@ export function LoginScreen({ navigation }: Props) {
           <Text className="text-sm text-secondary">Chưa có tài khoản?</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Register')}>
             <Text className="text-sm font-semibold text-primary">Đăng ký</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Privacy & Legal Links */}
+        <View className="flex-row justify-center mt-6 gap-3">
+          <TouchableOpacity onPress={() => Linking.openURL('https://modami.vn/privacy-policy')} activeOpacity={0.7}>
+            <Text className="text-xs text-secondary font-medium">Chính sách bảo mật</Text>
+          </TouchableOpacity>
+          <Text className="text-xs text-secondary">·</Text>
+          <TouchableOpacity onPress={() => Linking.openURL('https://modami.vn/terms-of-service')} activeOpacity={0.7}>
+            <Text className="text-xs text-secondary font-medium">Điều khoản</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

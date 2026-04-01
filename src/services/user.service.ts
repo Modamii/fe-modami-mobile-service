@@ -70,4 +70,8 @@ export const userService = {
   async updateCover(coverUrl: string): Promise<void> {
     await axiosClient.put(`${BASE}/users/me/cover`, { cover_url: coverUrl });
   },
+
+  async deleteAccount(): Promise<void> {
+    await axiosClient.delete(`${BASE}/users/me`);
+  },
 };

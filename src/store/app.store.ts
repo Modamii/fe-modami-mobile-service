@@ -74,6 +74,7 @@ export interface AuthState {
   ) => void;
   updateProfileApi: (data: UpdateProfileRequest) => Promise<void>;
   updateAvatarApi: (avatarUrl: string) => Promise<void>;
+  deleteAccount: () => Promise<boolean>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -188,6 +189,19 @@ export const useAuthStore = create<AuthState>()(
           if (!s.user) return s;
           return { user: { ...s.user, avatar: avatarUrl } };
         });
+      },
+
+      deleteAccount: async () => {
+        try {
+          await userService.deleteAccount();
+          tokenStorage.clear();
+          useCreditStore.getState().setBalance(0);
+          set({ user: null, isAuthenticated: false, authError: null });
+          return true;
+        } catch (err: any) {
+          set({ authError: err.message ?? 'Xóa tài khoản thất bại.' });
+          return false;
+        }
       },
     }),
     {

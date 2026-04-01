@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, Image, ScrollView, TouchableOpacity, Platform, Alert, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   BellIcon,
@@ -13,6 +13,7 @@ import {
   ClipboardDocumentListIcon,
   ShoppingBagIcon,
   UserIcon,
+  TrashIcon,
 } from 'react-native-heroicons/outline';
 import { useProductStore } from '@/store/app.store';
 import type { MainTabScreenProps } from '@/navigation/navigation.type';
@@ -63,8 +64,28 @@ function GuestProfileView({ navigation }: Pick<Props, 'navigation'>) {
 }
 
 export function ProfileScreen({ navigation }: Props) {
-  const { user, logout } = useAuthStore();
+  const { user, logout, deleteAccount } = useAuthStore();
   const savedCount = useProductStore((s) => s.favorites.length);
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Xóa tài khoản?',
+      'Hành động này sẽ xóa vĩnh viễn tài khoản và tất cả dữ liệu liên quan. Không thể hoàn tác.',
+      [
+        { text: 'Hủy', style: 'cancel' },
+        {
+          text: 'Xóa',
+          style: 'destructive',
+          onPress: async () => {
+            const ok = await deleteAccount();
+            if (ok) {
+              navigation.navigate('Login');
+            }
+          },
+        },
+      ],
+    );
+  };
 
   if (!user) return <GuestProfileView navigation={navigation} />;
 
@@ -171,16 +192,36 @@ export function ProfileScreen({ navigation }: Props) {
           ))}
         </View>
 
-        {/* Logout */}
+        {/* Logout & Delete Account */}
         <TouchableOpacity
           onPress={logout}
-          className="mx-5 mt-4 flex-row items-center gap-3 bg-surface rounded-2xl px-5 py-4 mb-6"
+          className="mx-5 mt-4 flex-row items-center gap-3 bg-surface rounded-2xl px-5 py-4"
           style={cardShadow}
           activeOpacity={0.7}
         >
           <ArrowRightOnRectangleIcon size={20} color="#ef4444" />
           <Text className="text-base text-red-500 font-medium">Đăng xuất</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={handleDeleteAccount}
+          className="mx-5 mt-2 flex-row items-center gap-3 bg-surface rounded-2xl px-5 py-4 mb-6"
+          style={cardShadow}
+          activeOpacity={0.7}
+        >
+          <TrashIcon size={20} color="#ef4444" />
+          <Text className="text-base text-red-500 font-medium">Xóa tài khoản</Text>
+        </TouchableOpacity>
+
+        {/* Privacy & Legal Links */}
+        <View className="mx-5 mb-6 gap-2">
+          <TouchableOpacity onPress={() => Linking.openURL('https://modami.vn/privacy-policy')} activeOpacity={0.7}>
+            <Text className="text-xs text-secondary text-center font-medium">Chính sách bảo mật</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => Linking.openURL('https://modami.vn/terms-of-service')} activeOpacity={0.7}>
+            <Text className="text-xs text-secondary text-center font-medium">Điều khoản dịch vụ</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
