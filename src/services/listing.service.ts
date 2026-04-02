@@ -6,37 +6,12 @@ import type {
   ProductCondition,
 } from '@/types/app.type';
 import type { ResponseData } from '@/types/api.types';
+import type { StoreEnvelope, StoreProduct } from '@/types/store-core.types';
 
 const delay = (ms = 300) =>
   new Promise<void>(resolve => setTimeout(resolve, ms));
 
 const BASE = CORE_URL;
-
-type CoreEnvelope<T> = {
-  success?: boolean;
-  data?: T;
-};
-
-type CoreProduct = {
-  id?: string;
-  title?: string;
-  price?: number;
-  images?: Array<{ url?: string } | string>;
-  category_id?: string;
-  category?: { id?: string; name?: string; name_vi?: string };
-  condition?: string;
-  status?: string;
-  submitted_at?: string;
-  updated_at?: string;
-  created_at?: string;
-  moderation?: {
-    reviewed_at?: string;
-    reviewer_name?: string;
-    reason_category?: string;
-    notes?: string;
-    suggested_action?: string;
-  };
-};
 
 type CreateProductRequest = {
   title: string;
@@ -63,59 +38,6 @@ function unwrapList<T>(data: unknown): T[] {
   return [];
 }
 
-function normalizeCondition(value?: string): MyListing['condition'] {
-  const normalized = (value ?? '').replace('_', '-');
-  if (normalized === 'new') return 'new';
-  if (normalized === 'like-new') return 'like-new';
-  if (normalized === 'fair') return 'fair';
-  return 'good';
-}
-
-function normalizeStatus(value?: string): ListingStatus {
-  const normalized = (value ?? '').toLowerCase();
-  if (normalized === 'pending') return 'pending';
-  if (normalized === 'under_review' || normalized === 'reviewing') return 'under_review';
-  if (normalized === 'approved' || normalized === 'published' || normalized === 'active') return 'approved';
-  if (normalized === 'rejected') return 'rejected';
-  if (normalized === 'sold') return 'sold';
-  return 'pending';
-}
-
-function normalizeImageList(images?: Array<{ url?: string } | string>): string[] {
-  if (!Array.isArray(images)) return [];
-  return images
-    .map(item => (typeof item === 'string' ? item : item?.url))
-    .filter((uri): uri is string => !!uri);
-}
-
-function mapCoreProductToMyListing(item: CoreProduct): MyListing {
-  const submittedAt = item.submitted_at ?? item.created_at ?? new Date().toISOString();
-  const updatedAt = item.updated_at ?? submittedAt;
-  const status = normalizeStatus(item.status);
-
-  return {
-    id: item.id ?? `lst-${Date.now()}`,
-    title: item.title ?? 'Bai dang ModaMi',
-    price: Number(item.price ?? 0),
-    images: normalizeImageList(item.images),
-    category: item.category?.name ?? item.category?.name_vi ?? item.category_id ?? 'Other',
-    condition: normalizeCondition(item.condition),
-    status,
-    submittedAt,
-    updatedAt,
-    productId: status === 'approved' || status === 'sold' ? item.id : undefined,
-    adminFeedback: status === 'rejected'
-      ? {
-          reviewedAt: item.moderation?.reviewed_at ?? updatedAt,
-          reviewerName: item.moderation?.reviewer_name ?? 'ModaMi Team',
-          reasonCategory: item.moderation?.reason_category ?? 'Can cap nhat bai dang',
-          notes: item.moderation?.notes ?? 'Bai dang can bo sung thong tin de tiep tuc duyet.',
-          suggestedAction: item.moderation?.suggested_action,
-        }
-      : undefined,
-  };
-}
-
 function toCoreCondition(condition: ProductCondition): CreateProductRequest['condition'] {
   if (condition === 'like-new') return 'like_new';
   return condition;
@@ -135,12 +57,12 @@ export interface SubmitListingPayload {
 export const listingService = {
   async getMyListings(): Promise<ResponseData<MyListing[]>> {
     try {
-      const res = await axiosClient.get<CoreEnvelope<unknown>>(
+      const res = await axiosClient.get<StoreEnvelope<unknown>>(
         `${BASE}/products/me`,
-      ) as unknown as CoreEnvelope<unknown>;
+      ) as unknown as StoreEnvelope<unknown>;
 
       return {
-        data: unwrapList<CoreProduct>(res.data).map(mapCoreProductToMyListing),
+        data: unwrapList<StoreProduct>(res.data) as unknown as MyListing[],
         success: true,
       };
     } catch {
@@ -151,12 +73,12 @@ export const listingService = {
 
   async getListingById(id: string): Promise<ResponseData<MyListing>> {
     try {
-      const res = await axiosClient.get<CoreEnvelope<CoreProduct>>(
+      const res = await axiosClient.get<StoreEnvelope<StoreProduct>>(
         `${BASE}/products/${id}`,
-      ) as unknown as CoreEnvelope<CoreProduct>;
+      ) as unknown as StoreEnvelope<StoreProduct>;
 
       if (!res.data) throw new Error('Listing payload empty');
-      return { data: mapCoreProductToMyListing(res.data), success: true };
+      return { data: res.data as unknown as MyListing, success: true };
     } catch {
       await delay(500);
       const listing = mockMyListings.find(l => l.id === id);
@@ -218,14 +140,14 @@ export const listingService = {
         })),
       };
 
-      const res = await axiosClient.post<CoreEnvelope<CoreProduct>>(
+      const res = await axiosClient.post<StoreEnvelope<StoreProduct>>(
         `${BASE}/products`,
         body,
-      ) as unknown as CoreEnvelope<CoreProduct>;
+      ) as unknown as StoreEnvelope<StoreProduct>;
 
       if (!res.data) throw new Error('Create listing payload empty');
       return {
-        data: mapCoreProductToMyListing({ ...res.data, status: res.data.status ?? 'pending' }),
+        data: { ...res.data, status: res.data.status ?? 'pending' } as unknown as MyListing,
         success: true,
       };
     } catch {

@@ -2,115 +2,12 @@ import { axiosClient, CORE_URL } from '@/lib/axios';
 import { mockProducts } from '@/data/mock-products.mock';
 import type { Product } from '@/types/app.type';
 import type { FilterProducts, ResponseData, ResponsePagination } from '@/types/api.types';
+import type { StoreEnvelope, StoreProduct } from '@/types/store-core.types';
 
 /** Simulates network latency. Remove when switching to real API. */
 const delay = (ms = 300) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 const BASE = CORE_URL;
-
-type CoreEnvelope<T> = {
-  success?: boolean;
-  data?: T;
-  meta?: {
-    page?: number;
-    page_size?: number;
-    total?: number;
-    total_pages?: number;
-  };
-};
-
-type CoreProduct = {
-  id?: string;
-  slug?: string;
-  title?: string;
-  price?: number;
-  credit_cost?: number;
-  images?: Array<{ url?: string } | string>;
-  condition?: string;
-  category_id?: string;
-  category?: { id?: string; name?: string; name_vi?: string; slug?: string };
-  brand?: string;
-  size?: string;
-  seller_id?: string;
-  seller?: {
-    id?: string;
-    display_name?: string;
-    full_name?: string;
-    username?: string;
-    rating?: number;
-    review_count?: number;
-    is_verified?: boolean;
-  };
-  seller_name?: string;
-  location?: string;
-  description?: string;
-  created_at?: string;
-  unlock_required?: boolean;
-  material?: string;
-  color?: string;
-  year?: number;
-  is_featured?: boolean;
-  is_verified?: boolean;
-  hashtags?: string[];
-  view_count?: number;
-  like_count?: number;
-  seller_rating?: number;
-  seller_review_count?: number;
-};
-
-function normalizeCondition(value?: string): Product['condition'] {
-  const normalized = (value ?? '').replace('_', '-');
-  if (normalized === 'new') return 'new';
-  if (normalized === 'like-new') return 'like-new';
-  if (normalized === 'fair') return 'fair';
-  return 'good';
-}
-
-function normalizeImageList(images?: Array<{ url?: string } | string>): string[] {
-  if (!Array.isArray(images)) return [];
-  return images
-    .map((item) => (typeof item === 'string' ? item : item?.url))
-    .filter((uri): uri is string => !!uri);
-}
-
-function mapCoreProductToAppProduct(item: CoreProduct): Product {
-  const images = normalizeImageList(item.images);
-  const sellerName =
-    item.seller_name ??
-    item.seller?.display_name ??
-    item.seller?.full_name ??
-    item.seller?.username ??
-    'ModaMi Seller';
-
-  return {
-    id: item.id ?? '',
-    slug: item.slug,
-    title: item.title ?? 'Sản phẩm ModaMi',
-    price: Number(item.price ?? 0),
-    creditCost: Number(item.credit_cost ?? 0),
-    images: images.length > 0 ? images : ['https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=800'],
-    condition: normalizeCondition(item.condition),
-    category: item.category?.name ?? item.category?.name_vi ?? item.category_id ?? 'Other',
-    brand: item.brand,
-    size: item.size,
-    sellerId: item.seller_id ?? item.seller?.id ?? '',
-    sellerName,
-    location: item.location,
-    description: item.description,
-    createdAt: item.created_at ?? new Date().toISOString(),
-    isUnlockRequired: Boolean(item.unlock_required ?? true),
-    material: item.material,
-    color: item.color,
-    year: item.year,
-    isFeatured: item.is_featured,
-    isVerified: item.is_verified ?? item.seller?.is_verified,
-    tags: item.hashtags,
-    viewCount: item.view_count,
-    likeCount: item.like_count,
-    sellerRating: item.seller_rating ?? item.seller?.rating,
-    sellerReviewCount: item.seller_review_count ?? item.seller?.review_count,
-  };
-}
 
 function unwrapList<T>(data: unknown): T[] {
   if (Array.isArray(data)) return data as T[];
@@ -198,19 +95,19 @@ export const productService = {
 
     try {
       const endpoint = '/products/search';
-      let res: CoreEnvelope<unknown>;
+      let res: StoreEnvelope<unknown>;
 
       try {
-        res = await axiosClient.get<CoreEnvelope<unknown>>(`${BASE}${endpoint}`, {
+        res = await axiosClient.get<StoreEnvelope<unknown>>(`${BASE}${endpoint}`, {
           params: buildSearchParams(params),
-        }) as unknown as CoreEnvelope<unknown>;
+        }) as unknown as StoreEnvelope<unknown>;
       } catch {
-        res = await axiosClient.get<CoreEnvelope<unknown>>(`${BASE}/search`, {
+        res = await axiosClient.get<StoreEnvelope<unknown>>(`${BASE}/search`, {
           params: buildSearchParams(params),
-        }) as unknown as CoreEnvelope<unknown>;
+        }) as unknown as StoreEnvelope<unknown>;
       }
 
-      const list = unwrapList<CoreProduct>(res.data).map(mapCoreProductToAppProduct);
+      const list = unwrapList<StoreProduct>(res.data) as unknown as Product[];
       const page = params?.page ?? res.meta?.page ?? 1;
       const pageSize = params?.pageSize ?? res.meta?.page_size ?? (list.length || 20);
       const start = (page - 1) * pageSize;
@@ -238,13 +135,13 @@ export const productService = {
    */
   getById: async (id: string): Promise<ResponseData<Product>> => {
     try {
-      const res = await axiosClient.get<CoreEnvelope<CoreProduct>>(
+      const res = await axiosClient.get<StoreEnvelope<StoreProduct>>(
         `${BASE}/products/${id}`,
-      ) as unknown as CoreEnvelope<CoreProduct>;
+      ) as unknown as StoreEnvelope<StoreProduct>;
 
       if (!res.data) throw new Error('Empty product payload');
 
-      return { data: mapCoreProductToAppProduct(res.data), success: true };
+      return { data: res.data as unknown as Product, success: true };
     } catch {
       await delay();
 
@@ -279,12 +176,12 @@ export const productService = {
    */
   getSimilar: async (id: string, limit = 4): Promise<ResponseData<Product[]>> => {
     try {
-      const res = await axiosClient.get<CoreEnvelope<unknown>>(
+      const res = await axiosClient.get<StoreEnvelope<unknown>>(
         `${BASE}/products/${id}/similar`,
         { params: { limit } },
-      ) as unknown as CoreEnvelope<unknown>;
+      ) as unknown as StoreEnvelope<unknown>;
 
-      const similar = unwrapList<CoreProduct>(res.data).map(mapCoreProductToAppProduct);
+      const similar = unwrapList<StoreProduct>(res.data) as unknown as Product[];
       return { data: similar.slice(0, limit), success: true };
     } catch {
       await delay();

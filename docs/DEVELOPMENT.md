@@ -85,8 +85,8 @@ Configured in `src/lib/axios.ts`:
 All services in `src/services/` follow this architecture:
 
 ```ts
-// 1. Define Core API types (DTO mapping)
-type CoreProduct = { id?: string; title?: string; /* ... */ };
+// 1. Use shared Core API payload types from src/types/store-core.types.ts
+type StoreProduct = { id?: string; title?: string; /* ... */ };
 
 // 2. Implement tolerant unwrapping (handles items/products/rows/categories)
 function unwrapList<T>(data: unknown): T[] {
@@ -96,15 +96,13 @@ function unwrapList<T>(data: unknown): T[] {
   return [];
 }
 
-// 3. Implement DTO mappers
-function mapCoreProductToAppProduct(item: CoreProduct): Product { /* ... */ }
-
+// 3. Parse StoreEnvelope<T> and return payloads directly (no mapper layer)
 // 4. Wrap API calls with fallback
 export const myService = {
   getList: async () => {
     try {
       const res = await axiosClient.get('/endpoint');
-      return { data: unwrapList(res.data).map(mapCoreProductToAppProduct), success: true };
+      return { data: unwrapList<StoreProduct>(res.data), success: true };
     } catch {
       return { data: mockData, success: true }; // Silent fallback to mock
     }
@@ -112,15 +110,15 @@ export const myService = {
 };
 ```
 
-### DTO Mapping Strategy
+### Store Payload Type Strategy
 
-Backend responses often use snake_case with nested objects. Services normalize to app types:
+Backend responses often use snake_case and nested objects. Services now keep payloads in Store* types and avoid object mapping inside service responses:
 
-- `like_new` (backend) → `like-new` (app)
-- `seller.display_name` (nested) → `sellerName` (flat)
-- Missing fields use sensible defaults
+- Shared payload contracts live in `src/types/store-core.types.ts`
+- Service methods parse `StoreEnvelope<T>` and unwrap lists with `unwrapList`
+- When preserving existing method signatures is required, services use safe type assertions instead of field-by-field mapper functions
 
-See `src/services/product.service.ts` for a complete example.
+See `src/services/product.service.ts` and `src/services/home.service.ts` for examples.
 
 ## Adding a New Screen
 
